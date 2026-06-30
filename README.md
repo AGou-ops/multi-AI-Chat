@@ -2,6 +2,12 @@
 
 [English](#english) | [中文](#中文)
 
+
+<img width="4262" height="2402" alt="63740ae17b879b9fce2ba5895cff9380" src="https://github.com/user-attachments/assets/125006df-266d-4c10-8e0f-615bc66fe7fa" />
+<img width="4284" height="2406" alt="45531fda19571148e037a4e11a48d3d5" src="https://github.com/user-attachments/assets/5dc50723-fc7f-428c-ae2c-b524a64fa359" />
+
+
+
 ---
 
 <a id="中文"></a>
