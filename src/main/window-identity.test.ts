@@ -1,0 +1,26 @@
+import { describe, expect, it, vi } from "vitest";
+import { APPLICATION_NAME, configureAppIdentity, createMainWindowOptions } from "./window-identity";
+
+describe("主窗口身份配置", () => {
+  it("保留原生标题栏并让窗口背景延续应用主体背景", () => {
+    const options = createMainWindowOptions("/tmp/preload.js");
+
+    expect(options).toEqual(
+      expect.objectContaining({
+        title: APPLICATION_NAME,
+        titleBarStyle: "default",
+        backgroundColor: "#f8fafc"
+      })
+    );
+  });
+
+  it("把 macOS Dock 悬停名称设置为应用显示名称", () => {
+    const app = {
+      setName: vi.fn()
+    };
+
+    configureAppIdentity(app);
+
+    expect(app.setName).toHaveBeenCalledWith("Multi AI Chat");
+  });
+});

@@ -1,0 +1,21 @@
+export const IPC_CHANNELS = {
+  LAYOUT_UPDATE: "platform-layout:update",
+  CONFIG_GET: "config:get",
+  CONFIG_UPDATE: "config:update",
+  CUSTOM_PLATFORM_DIALOG_OPEN: "custom-platform-dialog:open",
+  SETTINGS_DIALOG_OPEN: "settings-dialog:open",
+  THEME_PREFERENCE_CHANGED: "theme-preference:changed",
+  CUSTOM_PLATFORM_ADD: "custom-platform:add",
+  CUSTOM_PLATFORM_UPDATE: "custom-platform:update",
+  CUSTOM_PLATFORM_REMOVE: "custom-platform:remove",
+  PLATFORM_LIMIT_DIALOG_SHOW: "platform-limit-dialog:show",
+  PROMPT_COPY: "prompt:copy",
+  PROMPT_EXECUTE: "prompt:execute",
+  EXECUTION_RECORD_LIST: "execution-record:list",
+  PROMPT_HISTORY_SAVE: "prompt-history:save",
+  PROMPT_HISTORY_LIST: "prompt-history:list",
+  PROMPT_HISTORY_CLEAR: "prompt-history:clear",
+  CONFIRM_BATCH_SEND: "confirm-batch-send:show",
+  PLATFORM_RELOAD: "platform:reload",
+  PLATFORM_LOADING_STATE: "platform:loading-state"
+} as const;
