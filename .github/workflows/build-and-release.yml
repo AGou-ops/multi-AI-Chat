@@ -1,0 +1,87 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build macOS artifacts
+    runs-on: macos-latest
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build macOS package
+        run: npm run dist:mac
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p ci-artifacts
+          find dist -maxdepth 1 -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.blockmap" \) -print -exec cp {} ci-artifacts/ \;
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: multi-aichat-macos-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ci-artifacts/*
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Generate release changelog
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+
+          current_tag="${GITHUB_REF_NAME}"
+          previous_tag="$(git tag --sort=-version:refname | grep -v "^${current_tag}$" | head -n 1 || true)"
+
+          {
+            echo "## ChangeLog"
+            echo
+            echo "Tag: ${current_tag}"
+            echo
+
+            if [ -n "${previous_tag}" ]; then
+              echo "Changes since ${previous_tag}:"
+              git log --pretty=format:'- %s (%h)' "${previous_tag}..${current_tag}"
+              echo
+              echo
+              echo "Compare: https://github.com/${GITHUB_REPOSITORY}/compare/${previous_tag}...${current_tag}"
+            else
+              echo "Initial release changes:"
+              git log --pretty=format:'- %s (%h)' "${current_tag}"
+            fi
+          } > RELEASE_CHANGELOG.md
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Multi AI Chat ${{ github.ref_name }}
+          body_path: RELEASE_CHANGELOG.md
+          files: ci-artifacts/*
