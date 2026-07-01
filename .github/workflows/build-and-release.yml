@@ -42,7 +42,7 @@ jobs:
       - name: Collect artifacts
         run: |
           mkdir -p ci-artifacts
-          find dist -maxdepth 1 -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.blockmap" \) -print -exec cp {} ci-artifacts/ \;
+          find dist -maxdepth 1 -type f -name "*.dmg" -print -exec cp {} ci-artifacts/ \;
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4

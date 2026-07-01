@@ -38,10 +38,12 @@
     "files": [
       "dist/**"
     ],
+    "dmg": {
+      "writeUpdateInfo": false
+    },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ]
     }
   }
