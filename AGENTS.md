@@ -14,6 +14,22 @@ The repo uses the default triage label vocabulary: `needs-triage`, `needs-info`,
 
 This is a single-context repo: read root `CONTEXT.md` and relevant ADRs under `docs/adr/` when they exist. See `docs/agents/domain.md`.
 
+### Git completion workflow
+
+After completing any feature implementation or bug fix, the agent must automatically run `git add` for only the files changed by that task and create a local commit. Do not automatically push unless the user explicitly asks for it.
+
+Commit messages must be written in English only and must follow this exact format:
+
+```text
+<type>(<scope>): <summary>
+```
+
+- `<type>` must be one of `feat`, `fix`, `docs`, `test`, `refactor`, `chore`, `build`, or `ci`.
+- `<scope>` must be a short lowercase area name using only `a-z`, `0-9`, and hyphens.
+- `<summary>` must be imperative, start with a lowercase letter, contain no trailing period, and stay within 72 characters including the prefix.
+- Do not use Chinese or mixed-language text in the commit subject, body, or footer.
+- If a body is necessary, keep it in English, wrap lines at 72 characters, and describe what changed and why.
+
 ### Frontend implementation
 
 Frontend work must use test-driven development by vertical slices: write one behavior test, implement the smallest user-visible path, get it green, then continue. Do not write a batch of imagined tests before implementation.
