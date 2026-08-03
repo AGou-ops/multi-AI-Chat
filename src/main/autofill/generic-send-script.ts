@@ -1,4 +1,6 @@
-export function buildGenericAutosendScript(): string {
+export function buildGenericAutosendScript(options: { activate?: boolean } = {}): string {
+  const activate = options.activate !== false;
+
   return `
     (function() {
       const inputSelectors = [
@@ -137,6 +139,14 @@ export function buildGenericAutosendScript(): string {
         return 30 + (rect.left >= inputRect.right - 160 ? 25 : 0) + rightwardScore;
       }
 
+      function centerOf(element) {
+        const rect = rectOf(element);
+        return {
+          x: Math.round((rect.left ?? 0) + Math.max((rect.width ?? 0) / 2, 1)),
+          y: Math.round((rect.top ?? 0) + Math.max((rect.height ?? 0) / 2, 1))
+        };
+      }
+
       function dispatchPointerMouseEvent(element, eventName) {
         const rect = rectOf(element);
         const eventInit = {
@@ -157,14 +167,6 @@ export function buildGenericAutosendScript(): string {
           dispatchPointerMouseEvent(button, eventName);
         });
         button.click?.();
-      }
-
-      function centerOf(element) {
-        const rect = rectOf(element);
-        return {
-          x: Math.round((rect.left ?? 0) + Math.max((rect.width ?? 0) / 2, 1)),
-          y: Math.round((rect.top ?? 0) + Math.max((rect.height ?? 0) / 2, 1))
-        };
       }
 
       function activationTargets(element) {
@@ -245,7 +247,9 @@ export function buildGenericAutosendScript(): string {
 
       const sendButton = candidates[0]?.button;
       if (sendButton) {
-        activateButton(sendButton);
+        if (${activate ? "true" : "false"}) {
+          activateButton(sendButton);
+        }
         const center = centerOf(sendButton);
         return { sent: true, method: 'button', x: center.x, y: center.y };
       }

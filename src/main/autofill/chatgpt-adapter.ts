@@ -24,7 +24,7 @@ export class ChatGPTAdapter {
   }
 
   async attemptSend(webContents: WebContents): Promise<AutofillResult> {
-    const script = buildGenericAutosendScript();
+    const script = buildGenericAutosendScript({ activate: false });
 
     try {
       const result = await webContents.executeJavaScript(script);
