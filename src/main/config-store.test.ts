@@ -23,6 +23,7 @@ describe("ConfigStore", () => {
     expect(config.enabledPlatformIds).toEqual(["chatgpt"]);
     expect(config.platformLayoutMode).toBe("grid");
     expect(config.themePreference).toBe("system");
+    expect(config.autoClearPromptEnabled).toBe(true);
   });
 
   it("持久化配置到磁盘并能重新加载", () => {
@@ -75,6 +76,15 @@ describe("ConfigStore", () => {
     const config = store.load();
 
     expect(config.enabledPlatformIds).toEqual(["chatgpt"]);
+  });
+
+  it("旧配置缺少自动清空字段时回填为开启", () => {
+    writeFileSync(join(configDir, "config.json"), JSON.stringify({ enabledPlatformIds: ["chatgpt"] }));
+
+    const store = new ConfigStore(configDir);
+    const config = store.load();
+
+    expect(config.autoClearPromptEnabled).toBe(true);
   });
 
   it("默认为空自定义平台列表", () => {

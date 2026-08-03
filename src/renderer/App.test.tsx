@@ -443,7 +443,8 @@ describe("多 AI 工作台外壳", () => {
         expect.objectContaining({
           themePreference: "system",
           resolvedTheme: "light",
-          platformLayoutMode: "grid"
+          platformLayoutMode: "grid",
+          autoClearPromptEnabled: true
         })
       );
     });
@@ -457,6 +458,51 @@ describe("多 AI 工作台外壳", () => {
     });
     expect(screen.getByText("工作台偏好已更新")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "打开设置" }).closest(".app-shell")).toHaveAttribute("data-theme", "dark");
+  });
+
+  it("启用自动清空时点击填入已启用平台会清空输入框", async () => {
+    const executePrompt = vi.fn().mockResolvedValue({
+      record: sampleExecutionRecord,
+      promptHistory: []
+    });
+    mockBridge({ executePrompt });
+
+    render(<App />);
+
+    const promptInput = screen.getByLabelText("AI 也会犯错，谨记。");
+    fireEvent.change(promptInput, { target: { value: "需要填入的平台内容" } });
+    fireEvent.click(screen.getByRole("button", { name: "填入已启用平台" }));
+
+    await waitFor(() => {
+      expect(executePrompt).toHaveBeenCalledWith("需要填入的平台内容", ["chatgpt"], []);
+      expect(promptInput).toHaveValue("");
+    });
+  });
+
+  it("禁用自动清空时点击填入已启用平台会保留输入框内容", async () => {
+    const executePrompt = vi.fn().mockResolvedValue({
+      record: sampleExecutionRecord,
+      promptHistory: []
+    });
+    mockBridge({
+      executePrompt,
+      getConfig: vi.fn().mockResolvedValue({
+        enabledPlatformIds: ["chatgpt"],
+        customPlatforms: [],
+        autoClearPromptEnabled: false
+      } satisfies Partial<AppConfig>)
+    });
+
+    render(<App />);
+
+    const promptInput = screen.getByLabelText("AI 也会犯错，谨记。");
+    fireEvent.change(promptInput, { target: { value: "保留这段输入内容" } });
+    fireEvent.click(screen.getByRole("button", { name: "填入已启用平台" }));
+
+    await waitFor(() => {
+      expect(executePrompt).toHaveBeenCalledWith("保留这段输入内容", ["chatgpt"], []);
+      expect(promptInput).toHaveValue("保留这段输入内容");
+    });
   });
 
   it("设置弹窗内切换主题时立即同步到工作台并用于下次打开设置", async () => {
@@ -545,6 +591,7 @@ describe("多 AI 工作台外壳", () => {
       themePreference: "system",
       platformLayoutMode: "columns",
       promptRetentionPolicy: { type: "latest-days", days: 30 },
+      autoClearPromptEnabled: false,
       autoSendEnabledPlatformIds: ["claude"]
     });
     mockBridge({
@@ -566,6 +613,7 @@ describe("多 AI 工作台外壳", () => {
         expect.objectContaining({
           platformLayoutMode: "columns",
           promptRetentionPolicy: { type: "latest-days", days: 30 },
+          autoClearPromptEnabled: false,
           autoSendEnabledPlatformIds: ["claude"]
         })
       );

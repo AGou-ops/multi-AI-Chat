@@ -9,6 +9,7 @@ export interface AppConfig {
   customPlatforms: PlatformConfig[];
   promptRetentionPolicy: PromptRetentionPolicy;
   autoSendEnabledPlatformIds: string[];
+  autoClearPromptEnabled: boolean;
   platformLayoutMode: PlatformLayoutMode;
   themePreference: ThemePreference;
 }
@@ -18,6 +19,7 @@ export const defaultConfig: AppConfig = {
   customPlatforms: [],
   promptRetentionPolicy: defaultPromptRetentionPolicy,
   autoSendEnabledPlatformIds: [],
+  autoClearPromptEnabled: true,
   platformLayoutMode: "grid",
   themePreference: "system"
 };

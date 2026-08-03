@@ -30,6 +30,7 @@ export class ConfigStore {
         customPlatforms: parsed.customPlatforms ?? [],
         promptRetentionPolicy: parsed.promptRetentionPolicy ?? defaultConfig.promptRetentionPolicy,
         autoSendEnabledPlatformIds: parsed.autoSendEnabledPlatformIds ?? defaultConfig.autoSendEnabledPlatformIds,
+        autoClearPromptEnabled: parsed.autoClearPromptEnabled ?? defaultConfig.autoClearPromptEnabled,
         platformLayoutMode: parsed.platformLayoutMode ?? defaultConfig.platformLayoutMode,
         themePreference: parsed.themePreference ?? defaultConfig.themePreference
       };

@@ -37,6 +37,7 @@ export interface SettingsDialogOptions {
     | { type: "latest-count"; count: 50 | 200 }
     | { type: "latest-days"; days: 30 }
     | { type: "disabled" };
+  autoClearPromptEnabled: boolean;
   autoSendEnabledPlatformIds: string[];
   autoSendPlatforms: Array<{ id: string; name: string }>;
 }
@@ -45,6 +46,7 @@ export interface SettingsDialogResult {
   themePreference: SettingsDialogOptions["themePreference"];
   platformLayoutMode: SettingsDialogOptions["platformLayoutMode"];
   promptRetentionPolicy: SettingsDialogOptions["promptRetentionPolicy"];
+  autoClearPromptEnabled: boolean;
   autoSendEnabledPlatformIds: string[];
 }
 

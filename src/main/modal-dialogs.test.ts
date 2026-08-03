@@ -162,6 +162,7 @@ describe("showSettingsDialog", () => {
       resolvedTheme: "dark",
       platformLayoutMode: "grid",
       promptRetentionPolicy: { type: "forever" },
+      autoClearPromptEnabled: true,
       autoSendEnabledPlatformIds: ["claude"],
       autoSendPlatforms: [
         { id: "chatgpt", name: "ChatGPT" },
@@ -188,6 +189,9 @@ describe("showSettingsDialog", () => {
     expect(html).not.toContain(">×</button>");
     expect(html).toContain("syncThemePreview");
     expect(html).toContain('input[name="themePreference"]');
+    expect(html).toContain('name="autoClearPromptEnabled"');
+    expect(html).toContain("是否自动清空输入框");
+    expect(html).toContain("options.autoClearPromptEnabled");
     expect(html).toContain("document.body.dataset.theme = previewTheme");
 
     modalWindow?.emit("closed");
@@ -201,6 +205,7 @@ describe("showSettingsDialog", () => {
       resolvedTheme: "light",
       platformLayoutMode: "grid",
       promptRetentionPolicy: { type: "forever" },
+      autoClearPromptEnabled: true,
       autoSendEnabledPlatformIds: [],
       autoSendPlatforms: [],
       onThemePreferenceChange

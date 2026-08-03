@@ -864,6 +864,10 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
                 <option value="disabled">不保存</option>
               </select>
             </label>
+            <label class="settings-check" for="settings-auto-clear-prompt">
+              <input id="settings-auto-clear-prompt" type="checkbox" name="autoClearPromptEnabled" />
+              <span>是否自动清空输入框</span>
+            </label>
           </section>
           <section class="settings-section" aria-labelledby="send-settings-heading">
             <div class="settings-section-heading">
@@ -905,6 +909,7 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
       form.elements.themePreference.value = options.themePreference;
       form.elements.platformLayoutMode.value = options.platformLayoutMode;
       form.elements.promptRetention.value = retentionPolicyToValue(options.promptRetentionPolicy);
+      form.elements.autoClearPromptEnabled.checked = options.autoClearPromptEnabled;
       autoSendList.innerHTML = options.autoSendPlatforms.map((platform) => \`
         <label class="settings-check">
           <input type="checkbox" name="autoSendTarget" value="\${platform.id}" \${options.autoSendEnabledPlatformIds.includes(platform.id) ? "checked" : ""} />
@@ -917,6 +922,7 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
           themePreference: form.elements.themePreference.value,
           platformLayoutMode: form.elements.platformLayoutMode.value,
           promptRetentionPolicy: retentionPolicyFromValue(form.elements.promptRetention.value),
+          autoClearPromptEnabled: form.elements.autoClearPromptEnabled.checked,
           autoSendEnabledPlatformIds: Array.from(form.querySelectorAll("input[name='autoSendTarget']:checked")).map((input) => input.value)
         };
       }

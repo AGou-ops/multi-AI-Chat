@@ -60,6 +60,7 @@ export function App() {
   const [promptRetentionPolicy, setPromptRetentionPolicy] =
     useState<PromptRetentionPolicy>(defaultPromptRetentionPolicy);
   const [autoSendPlatformIds, setAutoSendPlatformIds] = useState<string[]>([]);
+  const [autoClearPromptEnabled, setAutoClearPromptEnabled] = useState(true);
   const [loadingPlatformIds, setLoadingPlatformIds] = useState<Set<string>>(new Set());
   const [isPlatformSidebarOpen, setIsPlatformSidebarOpen] = useState(true);
   const [isPromptHistorySidebarOpen, setIsPromptHistorySidebarOpen] = useState(true);
@@ -86,6 +87,9 @@ export function App() {
         }
         if (config.autoSendEnabledPlatformIds) {
           setAutoSendPlatformIds(config.autoSendEnabledPlatformIds);
+        }
+        if (typeof config.autoClearPromptEnabled === "boolean") {
+          setAutoClearPromptEnabled(config.autoClearPromptEnabled);
         }
         if (config.platformLayoutMode) {
           setPlatformLayoutMode(config.platformLayoutMode);
@@ -384,6 +388,9 @@ export function App() {
 
     setExecutionRecords((prev) => [response.record, ...prev]);
     setPromptHistory(response.promptHistory);
+    if (autoClearPromptEnabled) {
+      setPrompt("");
+    }
     setPromptStatus(`已记录 ${response.record.results.length} 个平台结果。`);
   }
 
@@ -418,6 +425,7 @@ export function App() {
       resolvedTheme,
       platformLayoutMode,
       promptRetentionPolicy,
+      autoClearPromptEnabled,
       autoSendEnabledPlatformIds: activeAutoSendPlatformIds,
       autoSendPlatforms: autoSendPlatforms.map((platform) => ({ id: platform.id, name: platform.name }))
     });
@@ -430,11 +438,13 @@ export function App() {
     setThemePreference(result.themePreference);
     setPlatformLayoutMode(result.platformLayoutMode);
     setPromptRetentionPolicy(result.promptRetentionPolicy);
+    setAutoClearPromptEnabled(result.autoClearPromptEnabled);
     setAutoSendPlatformIds(result.autoSendEnabledPlatformIds);
     await window.multiAIChat?.updateConfig({
       themePreference: result.themePreference,
       platformLayoutMode: result.platformLayoutMode,
       promptRetentionPolicy: result.promptRetentionPolicy,
+      autoClearPromptEnabled: result.autoClearPromptEnabled,
       autoSendEnabledPlatformIds: result.autoSendEnabledPlatformIds
     });
     setPromptStatus("工作台偏好已更新");
