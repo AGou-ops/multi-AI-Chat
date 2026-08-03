@@ -13,7 +13,7 @@ export function createMainWindowOptions(preloadPath: string): BrowserWindowConst
     minWidth: 960,
     minHeight: 640,
     title: APPLICATION_NAME,
-    titleBarStyle: "default",
+    titleBarStyle: "hiddenInset",
     backgroundColor: "#f8fafc",
     webPreferences: {
       preload: preloadPath,

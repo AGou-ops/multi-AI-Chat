@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { APPLICATION_NAME, configureAppIdentity, createMainWindowOptions } from "./window-identity";
 
 describe("主窗口身份配置", () => {
-  it("保留原生标题栏并让窗口背景延续应用主体背景", () => {
+  it("保留窗口标题并让原生标题栏透出应用主题背景", () => {
     const options = createMainWindowOptions("/tmp/preload.js");
 
     expect(options).toEqual(
       expect.objectContaining({
         title: APPLICATION_NAME,
-        titleBarStyle: "default",
+        titleBarStyle: "hiddenInset",
         backgroundColor: "#f8fafc"
       })
     );
