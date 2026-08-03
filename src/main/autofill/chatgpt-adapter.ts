@@ -2,7 +2,6 @@ import type { WebContents } from "electron";
 import type { AutofillResult } from "./types";
 import { buildGenericAutofillScript } from "./generic-fill-script";
 import { buildGenericAutosendScript } from "./generic-send-script";
-import { dispatchTrustedClick } from "./trusted-click";
 
 export class ChatGPTAdapter {
   readonly platformId = "chatgpt";
@@ -24,13 +23,12 @@ export class ChatGPTAdapter {
   }
 
   async attemptSend(webContents: WebContents): Promise<AutofillResult> {
-    const script = buildGenericAutosendScript({ activate: false });
+    const script = buildGenericAutosendScript({ activation: "dom" });
 
     try {
       const result = await webContents.executeJavaScript(script);
 
       if (result && result.sent) {
-        dispatchTrustedClick(webContents, result);
         return { success: true, reason: result.method === "enter" ? "已通过回车触发自动发送" : "已点击输入区发送按钮" };
       }
 

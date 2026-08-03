@@ -1,5 +1,6 @@
-export function buildGenericAutosendScript(options: { activate?: boolean } = {}): string {
+export function buildGenericAutosendScript(options: { activate?: boolean; activation?: "events" | "dom" } = {}): string {
   const activate = options.activate !== false;
+  const activation = options.activation ?? "events";
 
   return `
     (function() {
@@ -247,7 +248,9 @@ export function buildGenericAutosendScript(options: { activate?: boolean } = {})
 
       const sendButton = candidates[0]?.button;
       if (sendButton) {
-        if (${activate ? "true" : "false"}) {
+        if (${activate && activation === "dom" ? "true" : "false"}) {
+          sendButton.click?.();
+        } else if (${activate ? "true" : "false"}) {
           activateButton(sendButton);
         }
         const center = centerOf(sendButton);

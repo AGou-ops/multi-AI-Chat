@@ -120,7 +120,7 @@ describe("ChatGPTAdapter", () => {
     expect(injectedScript).not.toMatch(/location\.reload|navigate/);
   });
 
-  it("自动发送只点击输入区发送按钮，不误点侧边栏图标按钮", async () => {
+  it("自动发送只触发一次 ChatGPT 输入区按钮，不使用重复鼠标事件", async () => {
     const adapter = new ChatGPTAdapter();
     const sidebarClick = vi.fn();
     const sendClick = vi.fn();
@@ -172,10 +172,8 @@ describe("ChatGPTAdapter", () => {
     const result = await adapter.attemptSend(mockWC as WebContents);
 
     expect(result.success).toBe(true);
-    expect(sendClick).not.toHaveBeenCalled();
-    expect(sendInputEvent).toHaveBeenCalledTimes(3);
-    expect(sendInputEvent).toHaveBeenNthCalledWith(2, expect.objectContaining({ type: "mouseDown", clickCount: 1 }));
-    expect(sendInputEvent).toHaveBeenNthCalledWith(3, expect.objectContaining({ type: "mouseUp", clickCount: 1 }));
+    expect(sendClick).toHaveBeenCalledTimes(1);
+    expect(sendInputEvent).not.toHaveBeenCalled();
     expect(sidebarClick).not.toHaveBeenCalled();
   });
 });
