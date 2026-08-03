@@ -579,6 +579,7 @@ export function App() {
           </button>
         </div>
 
+        <span className="rail-section-label">内置平台</span>
         <ul className="platform-list" aria-label="内置平台">
           {builtInPlatforms.map((platform) => (
             <li key={platform.id}>
@@ -595,7 +596,9 @@ export function App() {
           ))}
         </ul>
 
-        {customPlatforms.length > 0 ? (
+        <hr className="rail-divider" />
+        <span className="rail-section-label">自定义平台</span>
+        {customPlatforms.length > 0 && (
           <ul className="platform-list" aria-label="自定义平台">
             {customPlatforms.map((platform) => (
               <li key={platform.id} className="custom-platform-item">
@@ -620,13 +623,14 @@ export function App() {
               </li>
             ))}
           </ul>
-        ) : null}
+        )}
 
         <button className="rail-add" type="button" aria-label="添加自定义平台" onClick={openAddForm}>
           <Plus aria-hidden="true" size={16} />
           <span>添加自定义平台</span>
         </button>
 
+        <div className="rail-spacer" />
         {!focusedPlatformId && enabledPlatforms.length > 1 ? (
           <div className="rail-layout-mode" role="group" aria-label="布局模式">
             <span className="rail-layout-mode-label">布局模式</span>

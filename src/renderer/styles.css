@@ -169,7 +169,6 @@ textarea:focus-visible {
 
 .platform-list {
   display: flex;
-  flex: 1;
   flex-direction: column;
   gap: 6px;
   margin: 0;
@@ -906,6 +905,32 @@ textarea:focus-visible {
   border-color: #fca5a5;
   background: #fef2f2;
   color: #dc2626;
+}
+
+.rail-section-label {
+  display: block;
+  padding: 0 2px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.rail-divider {
+  width: 100%;
+  height: 0;
+  margin: 2px 0;
+  border: none;
+  border-top: 1px solid #dbe7e5;
+}
+
+.app-shell[data-theme="dark"] .rail-divider {
+  border-top-color: #334155;
+}
+
+.rail-spacer {
+  flex: 1;
 }
 
 .rail-add {
