@@ -10,8 +10,8 @@ export function createMainWindowOptions(preloadPath: string): BrowserWindowConst
   return {
     width: 1280,
     height: 800,
-    minWidth: 960,
-    minHeight: 640,
+    minWidth: 1100,
+    minHeight: 720,
     title: APPLICATION_NAME,
     titleBarStyle: "default",
     backgroundColor: "#f8fafc",
