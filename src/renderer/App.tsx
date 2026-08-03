@@ -542,6 +542,10 @@ export function App() {
       data-theme-preference={themePreference}
       onKeyDown={handleKeyDown}
     >
+      <header className="app-titlebar" aria-label="窗口标题栏">
+        <span>Multi AI Chat</span>
+      </header>
+
       {isPlatformSidebarOpen ? (
       <nav className="platform-rail" aria-label="AI 平台">
         <div className="rail-header">
