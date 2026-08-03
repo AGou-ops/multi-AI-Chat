@@ -670,13 +670,6 @@ export function App() {
           data-layout-mode={platformLayoutMode}
           data-focus-platform={focusedPlatformId ?? undefined}
         >
-          {focusedPlatformId ? (
-            <button className="exit-focus-button" type="button" onClick={() => setFocusedPlatformId(null)}>
-              <Minimize2 aria-hidden="true" size={15} />
-              <span>退出聚焦模式</span>
-            </button>
-          ) : null}
-
           <div
             className={[
               "platform-grid",
@@ -723,6 +716,12 @@ export function App() {
                       >
                         <RefreshCw aria-hidden="true" size={14} className={isPlatformLoading ? "spinning" : ""} />
                       </button>
+                      {focusedPlatformId === platform.id ? (
+                        <button className="exit-focus-button" type="button" onClick={() => setFocusedPlatformId(null)}>
+                          <Minimize2 aria-hidden="true" size={15} />
+                          <span>退出聚焦模式</span>
+                        </button>
+                      ) : null}
                     </div>
                     {isPlatformLoading ? (
                       <div

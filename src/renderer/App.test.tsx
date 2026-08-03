@@ -1064,6 +1064,12 @@ describe("多 AI 工作台外壳", () => {
     expect(within(workspace).queryByRole("region", { name: "ChatGPT 视图" })).not.toBeInTheDocument();
     expect(within(workspace).queryByRole("button", { name: "聚焦 Claude" })).not.toBeInTheDocument();
 
+    const claudeFrame = within(workspace).getByRole("region", { name: "Claude 视图" });
+    const reloadButton = within(claudeFrame).getByRole("button", { name: "重新加载 Claude" });
+    const exitFocusButton = within(claudeFrame).getByRole("button", { name: "退出聚焦模式" });
+    expect(exitFocusButton.parentElement).toBe(reloadButton.parentElement);
+    expect(reloadButton.compareDocumentPosition(exitFocusButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
     fireEvent.click(screen.getByRole("button", { name: "退出聚焦模式" }));
 
     expect(workspace).not.toHaveAttribute("data-focus-platform");

@@ -447,19 +447,17 @@ textarea:focus-visible {
 }
 
 .exit-focus-button {
-  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 30px;
+  min-height: 28px;
   border: 1px solid #99f6e4;
-  border-radius: 8px;
+  border-radius: 7px;
   background: #ffffff;
   color: #115e59;
   padding: 0 10px;
   font-size: 12px;
   font-weight: 700;
-  box-shadow: 0 4px 10px rgb(15 23 42 / 10%);
   transition:
     background-color 160ms ease,
     border-color 160ms ease;
@@ -598,6 +596,13 @@ textarea:focus-visible {
 }
 
 .platform-title-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.platform-titlebar-actions {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
