@@ -19,6 +19,9 @@ contextBridge.exposeInMainWorld("multiAIChat", {
   setPlatformLayout(layout: PlatformLayoutState) {
     ipcRenderer.send(IPC_CHANNELS.LAYOUT_UPDATE, layout);
   },
+  toggleWindowMaximize(): Promise<void> {
+    return ipcRenderer.invoke(IPC_CHANNELS.WINDOW_MAXIMIZE_TOGGLE);
+  },
   getConfig(): Promise<AppConfig> {
     return ipcRenderer.invoke(IPC_CHANNELS.CONFIG_GET);
   },

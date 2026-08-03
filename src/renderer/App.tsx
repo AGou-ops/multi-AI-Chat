@@ -18,6 +18,7 @@ import {
   Trash2
 } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import type { ThemePreference } from "../shared/config";
 import type { PlatformExecutionResult, PromptExecutionRecord } from "../shared/execution-record";
 import type { PlatformLoadingState } from "../shared/platform-loading";
@@ -250,6 +251,15 @@ export function App() {
   function handleLayoutModeChange(mode: PlatformLayoutMode) {
     setPlatformLayoutMode(mode);
     void window.multiAIChat?.updateConfig({ platformLayoutMode: mode });
+  }
+
+  function handleWindowTitlebarKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    void window.multiAIChat?.toggleWindowMaximize();
   }
 
   function togglePlatform(platformId: string) {
@@ -544,6 +554,15 @@ export function App() {
     >
       {isPlatformSidebarOpen ? (
       <nav className="platform-rail has-titlebar-safe-area" aria-label="AI 平台">
+        <div
+          className="window-titlebar-region"
+          role="button"
+          tabIndex={0}
+          aria-label="双击切换窗口大小"
+          title="双击切换窗口大小"
+          onDoubleClick={() => void window.multiAIChat?.toggleWindowMaximize()}
+          onKeyDown={handleWindowTitlebarKeyDown}
+        />
         <div className="rail-header">
           <div className="pane-title">
             <PanelLeft aria-hidden="true" size={18} />
@@ -649,6 +668,15 @@ export function App() {
       </nav>
       ) : (
         <div className="collapsed-sidebar platform-sidebar-toggle has-titlebar-safe-area">
+          <div
+            className="window-titlebar-region"
+            role="button"
+            tabIndex={0}
+            aria-label="双击切换窗口大小"
+            title="双击切换窗口大小"
+            onDoubleClick={() => void window.multiAIChat?.toggleWindowMaximize()}
+            onKeyDown={handleWindowTitlebarKeyDown}
+          />
           <button
             className="pane-toggle-button"
             type="button"

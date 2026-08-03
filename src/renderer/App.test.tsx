@@ -139,6 +139,7 @@ afterEach(() => {
 
 function mockBridge(overrides: Partial<{
   setPlatformLayout: ReturnType<typeof vi.fn>;
+  toggleWindowMaximize: ReturnType<typeof vi.fn>;
   getConfig: ReturnType<typeof vi.fn>;
   updateConfig: ReturnType<typeof vi.fn>;
   addCustomPlatform: ReturnType<typeof vi.fn>;
@@ -162,6 +163,7 @@ function mockBridge(overrides: Partial<{
     configurable: true,
     value: {
       setPlatformLayout: overrides.setPlatformLayout ?? vi.fn(),
+      toggleWindowMaximize: overrides.toggleWindowMaximize ?? vi.fn().mockResolvedValue(undefined),
       getConfig: overrides.getConfig ?? vi.fn().mockResolvedValue({ enabledPlatformIds: ["chatgpt"], customPlatforms: [] }),
       updateConfig: overrides.updateConfig ?? vi.fn(),
       addCustomPlatform: overrides.addCustomPlatform ?? vi.fn().mockResolvedValue(undefined),
@@ -251,12 +253,23 @@ describe("多 AI 工作台外壳", () => {
     render(<App />);
 
     expect(screen.getByRole("navigation", { name: "AI 平台" })).toHaveClass("has-titlebar-safe-area");
+    expect(screen.getByRole("button", { name: "双击切换窗口大小" })).toBeInTheDocument();
     expect(screen.getByLabelText("AI 也会犯错，谨记。")).toBeInTheDocument();
     expect(screen.getByRole("main", { name: "平台工作区" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "ChatGPT" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Claude" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Gemini" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "DeepSeek" })).toBeInTheDocument();
+  });
+
+  it("双击左上角标题栏空白区域切换窗口大小", () => {
+    const toggleWindowMaximize = vi.fn().mockResolvedValue(undefined);
+    mockBridge({ toggleWindowMaximize });
+
+    render(<App />);
+    fireEvent.doubleClick(screen.getByRole("button", { name: "双击切换窗口大小" }));
+
+    expect(toggleWindowMaximize).toHaveBeenCalledOnce();
   });
 
   it("把 renderer 实测的平台内容区边界同步给主进程，避免真实视图遮挡 prompt 区", async () => {

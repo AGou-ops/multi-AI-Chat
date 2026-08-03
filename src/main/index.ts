@@ -10,6 +10,7 @@ import { decideNavigation } from "./navigation-policy";
 import { decidePermissionRequest } from "./permission-policy";
 import { boundsForLayout, type Bounds } from "./platform-layout";
 import { PromptHistoryStore } from "./prompt-history-store";
+import { toggleWindowMaximize } from "./window-controls";
 import { configureAppIdentity, createMainWindowOptions } from "./window-identity";
 import type { AppConfig, ThemePreference } from "../shared/config";
 import { defaultConfig } from "../shared/config";
@@ -245,6 +246,14 @@ ipcMain.on(IPC_CHANNELS.LAYOUT_UPDATE, (event, layout: PlatformLayoutState) => {
   }
 
   applyPlatformLayout(mainWindow, layout);
+});
+
+ipcMain.handle(IPC_CHANNELS.WINDOW_MAXIMIZE_TOGGLE, (event): void => {
+  if (!mainWindow || event.sender !== mainWindow.webContents || mainWindow.isDestroyed()) {
+    return;
+  }
+
+  toggleWindowMaximize(mainWindow);
 });
 
 ipcMain.handle(IPC_CHANNELS.CONFIG_GET, (): AppConfig => {

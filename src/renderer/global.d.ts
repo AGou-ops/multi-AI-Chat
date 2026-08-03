@@ -15,6 +15,7 @@ declare global {
   interface Window {
     multiAIChat?: {
       setPlatformLayout(layout: PlatformLayoutState): void;
+      toggleWindowMaximize(): Promise<void>;
       getConfig(): Promise<AppConfig>;
       updateConfig(config: Partial<AppConfig>): Promise<void>;
       openAddPlatformDialog(options: CustomPlatformDialogOptions): Promise<CustomPlatformInput | null>;

@@ -1,5 +1,6 @@
 export const IPC_CHANNELS = {
   LAYOUT_UPDATE: "platform-layout:update",
+  WINDOW_MAXIMIZE_TOGGLE: "window:maximize-toggle",
   CONFIG_GET: "config:get",
   CONFIG_UPDATE: "config:update",
   CUSTOM_PLATFORM_DIALOG_OPEN: "custom-platform-dialog:open",
