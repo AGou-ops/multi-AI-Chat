@@ -543,7 +543,7 @@ export function App() {
       onKeyDown={handleKeyDown}
     >
       {isPlatformSidebarOpen ? (
-      <nav className="platform-rail" aria-label="AI 平台">
+      <nav className="platform-rail has-titlebar-safe-area" aria-label="AI 平台">
         <div className="rail-header">
           <div className="pane-title">
             <PanelLeft aria-hidden="true" size={18} />
@@ -648,7 +648,7 @@ export function App() {
         </button>
       </nav>
       ) : (
-        <div className="collapsed-sidebar platform-sidebar-toggle">
+        <div className="collapsed-sidebar platform-sidebar-toggle has-titlebar-safe-area">
           <button
             className="pane-toggle-button"
             type="button"

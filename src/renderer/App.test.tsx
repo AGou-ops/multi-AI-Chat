@@ -250,7 +250,7 @@ describe("多 AI 工作台外壳", () => {
   it("渲染平台栏、prompt 命令栏和平台区域", () => {
     render(<App />);
 
-    expect(screen.getByRole("navigation", { name: "AI 平台" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "AI 平台" })).toHaveClass("has-titlebar-safe-area");
     expect(screen.getByLabelText("AI 也会犯错，谨记。")).toBeInTheDocument();
     expect(screen.getByRole("main", { name: "平台工作区" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "ChatGPT" })).toBeInTheDocument();
@@ -1097,7 +1097,7 @@ describe("多 AI 工作台外壳", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "隐藏平台侧边栏" }));
     expect(screen.queryByRole("navigation", { name: "AI 平台" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "展开平台侧边栏" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "展开平台侧边栏" }).parentElement).toHaveClass("has-titlebar-safe-area");
     expect(screen.getByRole("main", { name: "平台工作区" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "隐藏 Prompt 历史侧边栏" }));

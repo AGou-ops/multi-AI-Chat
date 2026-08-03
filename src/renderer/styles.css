@@ -138,6 +138,10 @@ textarea:focus-visible {
   background: #ecfdf5;
 }
 
+.has-titlebar-safe-area {
+  padding-top: 44px;
+}
+
 .history-sidebar-toggle {
   border-left: 1px solid #dbe7e5;
 }
