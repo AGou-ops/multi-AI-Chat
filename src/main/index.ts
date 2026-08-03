@@ -28,7 +28,8 @@ import type {
   SettingsDialogResult
 } from "../shared/types";
 
-const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
+const devServerUrl = process.env.ELECTRON_RENDERER_URL || process.env.VITE_DEV_SERVER_URL;
+const isDev = Boolean(devServerUrl);
 
 configureAppIdentity(app);
 
@@ -224,9 +225,9 @@ function applyPlatformLayout(window: BrowserWindow, layout: PlatformLayoutState)
 async function createWindow() {
   mainWindow = new BrowserWindow(createMainWindowOptions(join(__dirname, "../preload/index.js")));
 
-  if (isDev && process.env.VITE_DEV_SERVER_URL) {
+  if (isDev && devServerUrl) {
     await session.defaultSession.clearCache();
-    await mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
+    await mainWindow.loadURL(devServerUrl);
   } else {
     await mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }

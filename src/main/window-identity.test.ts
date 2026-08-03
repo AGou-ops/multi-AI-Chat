@@ -7,10 +7,10 @@ describe("主窗口身份配置", () => {
 
     expect(options).toEqual(
       expect.objectContaining({
-        minWidth: 1100,
-        minHeight: 720,
+        minWidth: 1500,
+        minHeight: 840,
         title: APPLICATION_NAME,
-        titleBarStyle: "default",
+        titleBarStyle: "hiddenInset",
         backgroundColor: "#f8fafc"
       })
     );
