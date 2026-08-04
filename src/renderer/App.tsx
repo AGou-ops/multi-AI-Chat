@@ -848,7 +848,7 @@ export function App() {
               </span>
             ) : null}
           </div>
-          <p className="prompt-status" aria-live="polite">
+          <p className={`prompt-status ${isEmptyPromptError ? "error-text" : ""}`} aria-live="polite">
             {promptStatus}
           </p>
         </footer>

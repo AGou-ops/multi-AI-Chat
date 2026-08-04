@@ -284,6 +284,12 @@ textarea:focus-visible {
   font-size: 12px;
 }
 
+.prompt-status.error-text {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+
 .auto-send-section {
   grid-column: 1 / -1;
   display: flex;
@@ -1243,6 +1249,11 @@ textarea:focus-visible {
 .app-shell[data-theme="dark"] .prompt-input.error-border::placeholder {
   color: #ef4444;
 }
+
+.app-shell[data-theme="dark"] .prompt-status.error-text {
+  color: #ef4444;
+}
+
 
 
 .app-shell[data-theme="dark"] .platform-titlebar strong,
