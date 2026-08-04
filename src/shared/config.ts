@@ -10,6 +10,7 @@ export interface AppConfig {
   promptRetentionPolicy: PromptRetentionPolicy;
   autoSendEnabledPlatformIds: string[];
   autoClearPromptEnabled: boolean;
+  confirmBatchSendEnabled: boolean;
   platformLayoutMode: PlatformLayoutMode;
   themePreference: ThemePreference;
 }
@@ -20,6 +21,7 @@ export const defaultConfig: AppConfig = {
   promptRetentionPolicy: defaultPromptRetentionPolicy,
   autoSendEnabledPlatformIds: [],
   autoClearPromptEnabled: true,
+  confirmBatchSendEnabled: true,
   platformLayoutMode: "grid",
   themePreference: "system"
 };

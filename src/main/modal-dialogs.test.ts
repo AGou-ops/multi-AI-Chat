@@ -163,6 +163,7 @@ describe("showSettingsDialog", () => {
       platformLayoutMode: "grid",
       promptRetentionPolicy: { type: "forever" },
       autoClearPromptEnabled: true,
+        confirmBatchSendEnabled: true,
       autoSendEnabledPlatformIds: ["claude"],
       autoSendPlatforms: [
         { id: "chatgpt", name: "ChatGPT" },
@@ -206,6 +207,7 @@ describe("showSettingsDialog", () => {
       platformLayoutMode: "grid",
       promptRetentionPolicy: { type: "forever" },
       autoClearPromptEnabled: true,
+        confirmBatchSendEnabled: true,
       autoSendEnabledPlatformIds: [],
       autoSendPlatforms: [],
       onThemePreferenceChange

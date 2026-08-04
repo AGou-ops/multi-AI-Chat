@@ -258,6 +258,16 @@ textarea:focus-visible {
   box-shadow: 0 0 0 3px rgb(13 148 136 / 16%);
 }
 
+.prompt-input.error-border {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.16);
+}
+
+.prompt-input.error-border::placeholder {
+  color: #dc2626;
+}
+
+
 .prompt-actions {
   display: flex;
   grid-row: 2;
@@ -1225,6 +1235,15 @@ textarea:focus-visible {
   background: #0f172a;
   color: #f8fafc;
 }
+
+.app-shell[data-theme="dark"] .prompt-input.error-border {
+  border-color: #ef4444;
+}
+
+.app-shell[data-theme="dark"] .prompt-input.error-border::placeholder {
+  color: #ef4444;
+}
+
 
 .app-shell[data-theme="dark"] .platform-titlebar strong,
 .app-shell[data-theme="dark"] .history-header h2,

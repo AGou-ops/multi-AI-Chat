@@ -62,6 +62,8 @@ export function App() {
     useState<PromptRetentionPolicy>(defaultPromptRetentionPolicy);
   const [autoSendPlatformIds, setAutoSendPlatformIds] = useState<string[]>([]);
   const [autoClearPromptEnabled, setAutoClearPromptEnabled] = useState(true);
+  const [confirmBatchSendEnabled, setConfirmBatchSendEnabled] = useState(true);
+  const [isEmptyPromptError, setIsEmptyPromptError] = useState(false);
   const [loadingPlatformIds, setLoadingPlatformIds] = useState<Set<string>>(new Set());
   const [isPlatformSidebarOpen, setIsPlatformSidebarOpen] = useState(true);
   const [isPromptHistorySidebarOpen, setIsPromptHistorySidebarOpen] = useState(true);
@@ -91,6 +93,9 @@ export function App() {
         }
         if (typeof config.autoClearPromptEnabled === "boolean") {
           setAutoClearPromptEnabled(config.autoClearPromptEnabled);
+        }
+        if (typeof config.confirmBatchSendEnabled === "boolean") {
+          setConfirmBatchSendEnabled(config.confirmBatchSendEnabled);
         }
         if (config.platformLayoutMode) {
           setPlatformLayoutMode(config.platformLayoutMode);
@@ -375,12 +380,13 @@ export function App() {
 
     if (!trimmedPrompt) {
       setPromptStatus("Prompt 为空，无法执行填入");
+      setIsEmptyPromptError(true);
       return;
     }
 
     const autoSendTargets = activeAutoSendPlatformIds;
 
-    if (autoSendTargets.length > 0) {
+    if (autoSendTargets.length > 0 && confirmBatchSendEnabled) {
       const confirmed = await window.multiAIChat?.confirmBatchSend(enabledPlatformIds, autoSendTargets, trimmedPrompt);
 
       if (!confirmed) {
@@ -436,6 +442,7 @@ export function App() {
       platformLayoutMode,
       promptRetentionPolicy,
       autoClearPromptEnabled,
+      confirmBatchSendEnabled,
       autoSendEnabledPlatformIds: activeAutoSendPlatformIds,
       autoSendPlatforms: autoSendPlatforms.map((platform) => ({ id: platform.id, name: platform.name }))
     });
@@ -455,6 +462,7 @@ export function App() {
       platformLayoutMode: result.platformLayoutMode,
       promptRetentionPolicy: result.promptRetentionPolicy,
       autoClearPromptEnabled: result.autoClearPromptEnabled,
+      confirmBatchSendEnabled: result.confirmBatchSendEnabled,
       autoSendEnabledPlatformIds: result.autoSendEnabledPlatformIds
     });
     setPromptStatus("工作台偏好已更新");

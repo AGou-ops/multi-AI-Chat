@@ -38,6 +38,7 @@ export interface SettingsDialogOptions {
     | { type: "latest-days"; days: 30 }
     | { type: "disabled" };
   autoClearPromptEnabled: boolean;
+  confirmBatchSendEnabled: boolean;
   autoSendEnabledPlatformIds: string[];
   autoSendPlatforms: Array<{ id: string; name: string }>;
 }
@@ -47,6 +48,7 @@ export interface SettingsDialogResult {
   platformLayoutMode: SettingsDialogOptions["platformLayoutMode"];
   promptRetentionPolicy: SettingsDialogOptions["promptRetentionPolicy"];
   autoClearPromptEnabled: boolean;
+  confirmBatchSendEnabled: boolean;
   autoSendEnabledPlatformIds: string[];
 }
 
