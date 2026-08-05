@@ -225,6 +225,31 @@ describe("showSettingsDialog", () => {
     modalWindow?.emit("closed");
     await expect(dialogPromise).resolves.toBeNull();
   });
+
+  it("设置复选框正确渲染 static checked 属性且 label 不包含多余 for 属性", async () => {
+    const dialogPromise = showSettingsDialog({} as never, {
+      themePreference: "system",
+      resolvedTheme: "light",
+      platformLayoutMode: "grid",
+      promptRetentionPolicy: { type: "forever" },
+      autoClearPromptEnabled: false,
+      confirmBatchSendEnabled: true,
+      autoSendEnabledPlatformIds: [],
+      autoSendPlatforms: []
+    });
+    const modalWindow = electronMock.BrowserWindowMock.instances.at(0);
+    const html = decodeLoadedHtml(modalWindow);
+
+    expect(html).toContain('id="settings-auto-clear-prompt" type="checkbox" name="autoClearPromptEnabled"');
+    expect(html).not.toContain('id="settings-auto-clear-prompt" type="checkbox" name="autoClearPromptEnabled" checked');
+    expect(html).toContain('id="settings-confirm-batch-send" type="checkbox" name="confirmBatchSendEnabled" checked');
+
+    expect(html).not.toContain('for="settings-auto-clear-prompt"');
+    expect(html).not.toContain('for="settings-confirm-batch-send"');
+
+    modalWindow?.emit("closed");
+    await expect(dialogPromise).resolves.toBeNull();
+  });
 });
 
 function decodeLoadedHtml(modalWindow: (typeof electronMock.BrowserWindowMock.instances)[number] | undefined): string {

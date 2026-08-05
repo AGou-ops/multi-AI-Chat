@@ -579,6 +579,8 @@ function buildAddPlatformDialogHtml(existingUrls: string[], theme: "light" | "da
 
 function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
   const optionsJson = JSON.stringify(options);
+  const isAutoClearPromptEnabled = options.autoClearPromptEnabled ?? true;
+  const isConfirmBatchSendEnabled = options.confirmBatchSendEnabled ?? true;
   const theme = options.resolvedTheme === "dark" ? "dark" : "light";
 
   return `<!doctype html>
@@ -864,12 +866,12 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
                 <option value="disabled">不保存</option>
               </select>
             </label>
-            <label class="settings-check" for="settings-auto-clear-prompt">
-              <input id="settings-auto-clear-prompt" type="checkbox" name="autoClearPromptEnabled" />
+            <label class="settings-check">
+              <input id="settings-auto-clear-prompt" type="checkbox" name="autoClearPromptEnabled" ${isAutoClearPromptEnabled ? "checked" : ""} />
               <span>是否自动清空输入框</span>
             </label>
-            <label class="settings-check" for="settings-confirm-batch-send">
-              <input id="settings-confirm-batch-send" type="checkbox" name="confirmBatchSendEnabled" />
+            <label class="settings-check">
+              <input id="settings-confirm-batch-send" type="checkbox" name="confirmBatchSendEnabled" ${isConfirmBatchSendEnabled ? "checked" : ""} />
               <span>“填入已启用平台”是否弹窗提示确认</span>
             </label>
           </section>
@@ -913,8 +915,8 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
       form.elements.themePreference.value = options.themePreference;
       form.elements.platformLayoutMode.value = options.platformLayoutMode;
       form.elements.promptRetention.value = retentionPolicyToValue(options.promptRetentionPolicy);
-      form.elements.autoClearPromptEnabled.checked = options.autoClearPromptEnabled;
-      form.elements.confirmBatchSendEnabled.checked = options.confirmBatchSendEnabled;
+      form.elements.autoClearPromptEnabled.checked = options.autoClearPromptEnabled ?? true;
+      form.elements.confirmBatchSendEnabled.checked = options.confirmBatchSendEnabled ?? true;
       autoSendList.innerHTML = options.autoSendPlatforms.map((platform) => \`
         <label class="settings-check">
           <input type="checkbox" name="autoSendTarget" value="\${platform.id}" \${options.autoSendEnabledPlatformIds.includes(platform.id) ? "checked" : ""} />
@@ -923,12 +925,14 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
       \`).join("");
 
       function collectResult() {
+        const autoClearInput = document.getElementById("settings-auto-clear-prompt");
+        const confirmBatchInput = document.getElementById("settings-confirm-batch-send");
         return {
           themePreference: form.elements.themePreference.value,
           platformLayoutMode: form.elements.platformLayoutMode.value,
           promptRetentionPolicy: retentionPolicyFromValue(form.elements.promptRetention.value),
-          autoClearPromptEnabled: form.elements.autoClearPromptEnabled.checked,
-          confirmBatchSendEnabled: form.elements.confirmBatchSendEnabled.checked,
+          autoClearPromptEnabled: autoClearInput ? autoClearInput.checked : Boolean(form.elements.autoClearPromptEnabled.checked),
+          confirmBatchSendEnabled: confirmBatchInput ? confirmBatchInput.checked : Boolean(form.elements.confirmBatchSendEnabled.checked),
           autoSendEnabledPlatformIds: Array.from(form.querySelectorAll("input[name='autoSendTarget']:checked")).map((input) => input.value)
         };
       }

@@ -63,6 +63,10 @@ export function App() {
   const [autoSendPlatformIds, setAutoSendPlatformIds] = useState<string[]>([]);
   const [autoClearPromptEnabled, setAutoClearPromptEnabled] = useState(true);
   const [confirmBatchSendEnabled, setConfirmBatchSendEnabled] = useState(true);
+  const autoClearPromptEnabledRef = useRef(autoClearPromptEnabled);
+  autoClearPromptEnabledRef.current = autoClearPromptEnabled;
+  const confirmBatchSendEnabledRef = useRef(confirmBatchSendEnabled);
+  confirmBatchSendEnabledRef.current = confirmBatchSendEnabled;
   const [isEmptyPromptError, setIsEmptyPromptError] = useState(false);
   const [loadingPlatformIds, setLoadingPlatformIds] = useState<Set<string>>(new Set());
   const [isPlatformSidebarOpen, setIsPlatformSidebarOpen] = useState(true);
@@ -386,7 +390,7 @@ export function App() {
 
     const autoSendTargets = activeAutoSendPlatformIds;
 
-    if (autoSendTargets.length > 0 && confirmBatchSendEnabled) {
+    if (autoSendTargets.length > 0 && confirmBatchSendEnabledRef.current) {
       const confirmed = await window.multiAIChat?.confirmBatchSend(enabledPlatformIds, autoSendTargets, trimmedPrompt);
 
       if (!confirmed) {
@@ -404,7 +408,7 @@ export function App() {
 
     setExecutionRecords((prev) => [response.record, ...prev]);
     setPromptHistory(response.promptHistory);
-    if (autoClearPromptEnabled) {
+    if (autoClearPromptEnabledRef.current) {
       setPrompt("");
     }
     setPromptStatus(`已记录 ${response.record.results.length} 个平台结果。`);
