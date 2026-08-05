@@ -123,7 +123,7 @@ function ensurePlatformView(window: BrowserWindow, platformId: string) {
         cancelId: 1,
         title: "权限请求",
         message: `${platform.id} 请求 ${permission} 权限`,
-        detail: "第一版不会记住权限决定，每次敏感权限请求都会重新确认。"
+        detail: "敏感权限请求确认"
       })
       .then((result) => callback(result.response === 0))
       .catch(() => callback(false));
