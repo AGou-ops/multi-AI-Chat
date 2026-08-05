@@ -25,7 +25,7 @@ import type { PlatformLoadingState } from "../shared/platform-loading";
 import type { PlatformLayoutMode, PlatformViewBounds } from "../shared/platformLayout";
 import { generatePlatformId, validateCustomPlatform } from "../shared/platformValidation";
 import { builtInPlatforms, initialPlatform } from "../shared/platforms";
-import { defaultPromptRetentionPolicy, type PromptHistoryItem, type PromptRetentionPolicy } from "../shared/prompt-history";
+import { collapseConsecutivePrompts, defaultPromptRetentionPolicy, formatPromptTimestamp, type PromptHistoryItem, type PromptRetentionPolicy } from "../shared/prompt-history";
 import type { PlatformConfig } from "../shared/types";
 import "./styles.css";
 
@@ -914,9 +914,14 @@ export function App() {
             </div>
             {promptHistory.length > 0 ? (
               <ul className="history-list">
-                {promptHistory.map((item) => (
+                {collapseConsecutivePrompts(promptHistory).map((item) => (
                   <li key={item.id}>
-                    <button className="history-item" type="button" onClick={() => setPrompt(item.content)}>
+                    <button
+                      className="history-item"
+                      type="button"
+                      onClick={() => setPrompt(item.content)}
+                      title={formatPromptTimestamp(item.updatedAt || item.createdAt)}
+                    >
                       {item.content}
                     </button>
                   </li>

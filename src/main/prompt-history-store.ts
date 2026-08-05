@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { PromptHistoryItem, PromptRetentionPolicy } from "../shared/prompt-history";
+import { collapseConsecutivePrompts, type PromptHistoryItem, type PromptRetentionPolicy } from "../shared/prompt-history";
 
 const HISTORY_FILENAME = "prompt-history.json";
 
@@ -22,7 +22,7 @@ export class PromptHistoryStore {
 
     try {
       const parsed = JSON.parse(readFileSync(filePath, "utf-8")) as PromptHistoryItem[];
-      this.history = Array.isArray(parsed) ? parsed : [];
+      this.history = Array.isArray(parsed) ? collapseConsecutivePrompts(parsed) : [];
     } catch {
       this.history = [];
     }
@@ -41,7 +41,8 @@ export class PromptHistoryStore {
       return this.list();
     }
 
-    return this.history.filter((item) => item.content.toLowerCase().includes(normalizedQuery));
+    const filtered = this.history.filter((item) => item.content.toLowerCase().includes(normalizedQuery));
+    return collapseConsecutivePrompts(filtered);
   }
 
   savePrompt(content: string, policy: PromptRetentionPolicy, createdAt: Date = this.now()): PromptHistoryItem[] {
@@ -52,14 +53,25 @@ export class PromptHistoryStore {
     }
 
     const timestamp = createdAt.toISOString();
-    const item: PromptHistoryItem = {
-      id: `prompt-${createdAt.getTime()}-${this.history.length + 1}`,
-      content: trimmedContent,
-      createdAt: timestamp,
-      updatedAt: timestamp
-    };
 
-    this.history = this.applyRetention([item, ...this.history], policy);
+    if (this.history.length > 0 && this.history[0].content === trimmedContent) {
+      this.history[0] = {
+        ...this.history[0],
+        createdAt: timestamp,
+        updatedAt: timestamp
+      };
+    } else {
+      const item: PromptHistoryItem = {
+        id: `prompt-${createdAt.getTime()}-${this.history.length + 1}`,
+        content: trimmedContent,
+        createdAt: timestamp,
+        updatedAt: timestamp
+      };
+
+      this.history = [item, ...this.history];
+    }
+
+    this.history = collapseConsecutivePrompts(this.applyRetention(this.history, policy));
     this.save();
 
     return this.list();

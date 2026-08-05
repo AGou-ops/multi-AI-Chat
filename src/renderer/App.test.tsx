@@ -1,3 +1,4 @@
+import { formatPromptTimestamp } from "../shared/prompt-history";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { AppConfig } from "../shared/config";
 import type { PromptExecutionRecord } from "../shared/execution-record";
@@ -1315,6 +1316,40 @@ describe("prompt 历史", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "生成 React 测试" }));
     expect(screen.getByLabelText("AI 也会犯错，谨记。")).toHaveValue("生成 React 测试");
+  });
+
+  it("合并连续重复的 prompt 并在 hover 时以 '年月日时分秒' 格式显示发送时间", async () => {
+    const listPromptHistory = vi.fn().mockResolvedValue([
+      {
+        id: "prompt-1",
+        content: "iOS的隐根和无根越狱有什么区别？",
+        createdAt: "2026-08-05T14:30:15.000Z",
+        updatedAt: "2026-08-05T14:30:15.000Z"
+      },
+      {
+        id: "prompt-2",
+        content: "iOS的隐根和无根越狱有什么区别？",
+        createdAt: "2026-08-05T14:20:00.000Z",
+        updatedAt: "2026-08-05T14:20:00.000Z"
+      },
+      {
+        id: "prompt-3",
+        content: "英文缩写 tho 什么意思",
+        createdAt: "2026-08-05T14:10:00.000Z",
+        updatedAt: "2026-08-05T14:10:00.000Z"
+      }
+    ]);
+    mockBridge({ listPromptHistory });
+
+    render(<App />);
+
+    await waitFor(() => {
+      const iosButtons = screen.getAllByRole("button", { name: "iOS的隐根和无根越狱有什么区别？" });
+      expect(iosButtons).toHaveLength(1);
+
+      const expectedTime = formatPromptTimestamp("2026-08-05T14:30:15.000Z");
+      expect(iosButtons[0]).toHaveAttribute("title", expectedTime);
+    });
   });
 
   it("可以清空 prompt 历史", async () => {

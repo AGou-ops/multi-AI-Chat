@@ -1,8 +1,8 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PromptHistoryStore } from "./prompt-history-store";
-import type { PromptRetentionPolicy } from "../shared/prompt-history";
+import type { PromptHistoryItem, PromptRetentionPolicy } from "../shared/prompt-history";
 
 describe("PromptHistoryStore", () => {
   let storeDir: string;
@@ -25,6 +25,58 @@ describe("PromptHistoryStore", () => {
 
     expect(history).toHaveLength(1);
     expect(history[0].content).toBe("解释 WebContentsView");
+  });
+
+  it("连续发送相同 prompt 时合并记录并更新发送时间", () => {
+    const time1 = new Date("2026-08-05T10:00:00.000Z");
+    const time2 = new Date("2026-08-05T10:05:00.000Z");
+
+    const store = new PromptHistoryStore(storeDir);
+    store.load();
+
+    store.savePrompt("iOS的隐根和无根越狱有什么区别？", { type: "forever" }, time1);
+    store.savePrompt("iOS的隐根和无根越狱有什么区别？", { type: "forever" }, time2);
+
+    const history = store.list();
+    expect(history).toHaveLength(1);
+    expect(history[0].content).toBe("iOS的隐根和无根越狱有什么区别？");
+    expect(history[0].createdAt).toBe(time2.toISOString());
+  });
+
+  it("隔开发送相同 prompt 时不合并", () => {
+    const time1 = new Date("2026-08-05T10:00:00.000Z");
+    const time2 = new Date("2026-08-05T10:01:00.000Z");
+    const time3 = new Date("2026-08-05T10:02:00.000Z");
+
+    const store = new PromptHistoryStore(storeDir);
+    store.load();
+
+    store.savePrompt("iOS的隐根和无根越狱有什么区别？", { type: "forever" }, time1);
+    store.savePrompt("英文缩写 tho 什么意思", { type: "forever" }, time2);
+    store.savePrompt("iOS的隐根和无根越狱有什么区别？", { type: "forever" }, time3);
+
+    const history = store.list();
+    expect(history).toHaveLength(3);
+    expect(history.map((item) => item.content)).toEqual([
+      "iOS的隐根和无根越狱有什么区别？",
+      "英文缩写 tho 什么意思",
+      "iOS的隐根和无根越狱有什么区别？"
+    ]);
+  });
+
+  it("加载已存磁盘文件时合并其中的连续重复记录", () => {
+    const rawHistory: PromptHistoryItem[] = [
+      { id: "1", content: "重复 prompt", createdAt: "2026-08-05T10:05:00.000Z", updatedAt: "2026-08-05T10:05:00.000Z" },
+      { id: "2", content: "重复 prompt", createdAt: "2026-08-05T10:00:00.000Z", updatedAt: "2026-08-05T10:00:00.000Z" }
+    ];
+    writeFileSync(join(storeDir, "prompt-history.json"), JSON.stringify(rawHistory), "utf-8");
+
+    const store = new PromptHistoryStore(storeDir);
+    const history = store.load();
+
+    expect(history).toHaveLength(1);
+    expect(history[0].id).toBe("1");
+    expect(history[0].createdAt).toBe("2026-08-05T10:05:00.000Z");
   });
 
   it("按关键词搜索 prompt 历史", () => {
