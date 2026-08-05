@@ -1519,4 +1519,44 @@ describe("自定义平台管理", () => {
       expect(removeCustomPlatform).toHaveBeenCalledWith("custom-perplexity-abc");
     });
   });
+
+  it("宿主设置弹窗返回后可以调整批量发送确认配置并作用于后续打开", async () => {
+    const updateConfig = vi.fn();
+    const openSettingsDialog = vi.fn().mockResolvedValueOnce({
+      themePreference: "system",
+      platformLayoutMode: "grid",
+      promptRetentionPolicy: { type: "forever" },
+      autoClearPromptEnabled: true,
+      confirmBatchSendEnabled: false,
+      autoSendEnabledPlatformIds: []
+    }).mockResolvedValueOnce(null);
+    mockBridge({ updateConfig, openSettingsDialog });
+
+    render(<App />);
+
+    // Open settings for the first time
+    fireEvent.click(screen.getByRole("button", { name: "打开设置" }));
+
+    await waitFor(() => {
+      expect(openSettingsDialog).toHaveBeenNthCalledWith(1,
+        expect.objectContaining({
+          confirmBatchSendEnabled: true
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(updateConfig).toHaveBeenCalledWith(expect.objectContaining({ confirmBatchSendEnabled: false }));
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "打开设置" }));
+
+    await waitFor(() => {
+      expect(openSettingsDialog).toHaveBeenNthCalledWith(2,
+        expect.objectContaining({
+          confirmBatchSendEnabled: false
+        })
+      );
+    });
+  });
 });

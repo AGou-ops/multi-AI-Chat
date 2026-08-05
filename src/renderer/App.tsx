@@ -456,6 +456,7 @@ export function App() {
     setPlatformLayoutMode(result.platformLayoutMode);
     setPromptRetentionPolicy(result.promptRetentionPolicy);
     setAutoClearPromptEnabled(result.autoClearPromptEnabled);
+    setConfirmBatchSendEnabled(result.confirmBatchSendEnabled);
     setAutoSendPlatformIds(result.autoSendEnabledPlatformIds);
     await window.multiAIChat?.updateConfig({
       themePreference: result.themePreference,
