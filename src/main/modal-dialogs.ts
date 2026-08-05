@@ -201,6 +201,17 @@ export async function showSettingsDialog(
     ipcMain.on(SETTINGS_CANCEL_CHANNEL, handleCancel);
     ipcMain.on(SETTINGS_THEME_CHANGE_CHANNEL, handleThemeChange);
 
+    modalWindow.on("close", (event) => {
+      if (settled) {
+        return;
+      }
+
+      event.preventDefault();
+      void modalWindow.webContents
+        .executeJavaScript("collectResult()", true)
+        .then((payload) => finish(payload as SettingsDialogResult))
+        .catch(() => finish(null));
+    });
     modalWindow.on("closed", () => finish(null));
     modalWindow.once("ready-to-show", () => {
       modalWindow.show();
@@ -955,7 +966,7 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
         ipcRenderer.send("${SETTINGS_SUBMIT_CHANNEL}", collectResult());
       });
       cancelButton.addEventListener("click", () => ipcRenderer.send("${SETTINGS_CANCEL_CHANNEL}"));
-      closeButton.addEventListener("click", () => ipcRenderer.send("${SETTINGS_CANCEL_CHANNEL}"));
+      closeButton.addEventListener("click", () => form.requestSubmit());
       window.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           ipcRenderer.send("${SETTINGS_CANCEL_CHANNEL}");

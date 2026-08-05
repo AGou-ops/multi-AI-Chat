@@ -250,6 +250,27 @@ describe("showSettingsDialog", () => {
     modalWindow?.emit("closed");
     await expect(dialogPromise).resolves.toBeNull();
   });
+
+  it("点击标题栏关闭按钮时提交当前设置，而底部取消按钮仍放弃修改", async () => {
+    const dialogPromise = showSettingsDialog({} as never, {
+      themePreference: "system",
+      resolvedTheme: "light",
+      platformLayoutMode: "grid",
+      promptRetentionPolicy: { type: "forever" },
+      autoClearPromptEnabled: true,
+      confirmBatchSendEnabled: true,
+      autoSendEnabledPlatformIds: [],
+      autoSendPlatforms: []
+    });
+    const modalWindow = electronMock.BrowserWindowMock.instances.at(0);
+    const html = decodeLoadedHtml(modalWindow);
+
+    expect(html).toContain('closeButton.addEventListener("click", () => form.requestSubmit())');
+    expect(html).toContain('cancelButton.addEventListener("click", () => ipcRenderer.send("modal:settings:cancel"))');
+
+    modalWindow?.emit("closed");
+    await expect(dialogPromise).resolves.toBeNull();
+  });
 });
 
 function decodeLoadedHtml(modalWindow: (typeof electronMock.BrowserWindowMock.instances)[number] | undefined): string {
