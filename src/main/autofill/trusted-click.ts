@@ -28,3 +28,13 @@ export function dispatchEnterKey(webContents: WebContents): void {
   webContents.sendInputEvent({ type: "keyDown", keyCode: "Enter" });
   webContents.sendInputEvent({ type: "keyUp", keyCode: "Enter" });
 }
+
+export function dispatchCommandEnter(webContents: WebContents): void {
+  if (typeof webContents.sendInputEvent !== "function") {
+    return;
+  }
+
+  webContents.sendInputEvent({ type: "keyDown", keyCode: "Enter", modifiers: ["meta"] });
+  webContents.sendInputEvent({ type: "char", keyCode: "Enter", modifiers: ["meta"] });
+  webContents.sendInputEvent({ type: "keyUp", keyCode: "Enter", modifiers: ["meta"] });
+}
