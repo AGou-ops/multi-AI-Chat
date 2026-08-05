@@ -39,8 +39,8 @@ export interface SettingsDialogOptions {
     | { type: "disabled" };
   autoClearPromptEnabled: boolean;
   confirmBatchSendEnabled: boolean;
-  autoSendEnabledPlatformIds: string[];
-  autoSendPlatforms: Array<{ id: string; name: string }>;
+  autoSendEnabledPlatformIds?: string[];
+  autoSendPlatforms?: Array<{ id: string; name: string }>;
 }
 
 export interface SettingsDialogResult {
@@ -49,7 +49,7 @@ export interface SettingsDialogResult {
   promptRetentionPolicy: SettingsDialogOptions["promptRetentionPolicy"];
   autoClearPromptEnabled: boolean;
   confirmBatchSendEnabled: boolean;
-  autoSendEnabledPlatformIds: string[];
+  autoSendEnabledPlatformIds?: string[];
 }
 
 export interface PlatformValidationErrors {
