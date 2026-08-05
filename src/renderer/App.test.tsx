@@ -253,7 +253,7 @@ describe("多 AI 工作台外壳", () => {
     render(<App />);
 
     expect(screen.getByRole("navigation", { name: "AI 平台" })).toHaveClass("has-titlebar-safe-area");
-    expect(screen.getByRole("button", { name: "双击切换窗口大小" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "拖拽移动窗口，双击切换窗口大小" })).toBeInTheDocument();
     expect(screen.getByLabelText("AI 也会犯错，谨记。")).toBeInTheDocument();
     expect(screen.getByRole("main", { name: "平台工作区" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "ChatGPT" })).toBeInTheDocument();
@@ -267,7 +267,7 @@ describe("多 AI 工作台外壳", () => {
     mockBridge({ toggleWindowMaximize });
 
     render(<App />);
-    fireEvent.doubleClick(screen.getByRole("button", { name: "双击切换窗口大小" }));
+    fireEvent.doubleClick(screen.getByRole("button", { name: "拖拽移动窗口，双击切换窗口大小" }));
 
     expect(toggleWindowMaximize).toHaveBeenCalledOnce();
   });
@@ -605,7 +605,7 @@ describe("多 AI 工作台外壳", () => {
       platformLayoutMode: "columns",
       promptRetentionPolicy: { type: "latest-days", days: 30 },
       autoClearPromptEnabled: false,
-      autoSendEnabledPlatformIds: ["claude"]
+      
     });
     mockBridge({
       updateConfig,
@@ -627,7 +627,7 @@ describe("多 AI 工作台外壳", () => {
           platformLayoutMode: "columns",
           promptRetentionPolicy: { type: "latest-days", days: 30 },
           autoClearPromptEnabled: false,
-          autoSendEnabledPlatformIds: ["claude"]
+          
         })
       );
     });
@@ -1337,7 +1337,7 @@ describe("prompt 历史", () => {
       expect(screen.getByRole("button", { name: "需要清空" })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "清空历史" }));
+    fireEvent.click(screen.getByRole("button", { name: "清空" }));
 
     await waitFor(() => {
       expect(clearPromptHistory).toHaveBeenCalled();
@@ -1345,22 +1345,7 @@ describe("prompt 历史", () => {
     });
   });
 
-  it("可以选择 prompt 历史保留策略", async () => {
-    const updateConfig = vi.fn();
-    mockBridge({ updateConfig });
 
-    render(<App />);
-
-    fireEvent.change(screen.getByLabelText("历史保留策略"), {
-      target: { value: "latest-50" }
-    });
-
-    await waitFor(() => {
-      expect(updateConfig).toHaveBeenCalledWith({
-        promptRetentionPolicy: { type: "latest-count", count: 50 }
-      });
-    });
-  });
 });
 
 describe("自定义平台管理", () => {

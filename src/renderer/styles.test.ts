@@ -13,8 +13,7 @@ describe("工作台暗黑主题样式", () => {
   });
 
   it("右侧历史面板内容文字在暗黑主题下使用白色", () => {
-    expect(styles).toContain(`.app-shell[data-theme="dark"] .history-header span,
-.app-shell[data-theme="dark"] .history-empty,
+    expect(styles).toContain(`.app-shell[data-theme="dark"] .history-empty,
 .app-shell[data-theme="dark"] .execution-item-header strong,
 .app-shell[data-theme="dark"] .execution-item p,
 .app-shell[data-theme="dark"] .history-item {

@@ -645,6 +645,12 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
       h2 {
         font-size: 13px;
       }
+      form {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 1;
+      }
       .settings-dialog-body {
         display: grid;
         gap: 12px;
@@ -886,13 +892,6 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
               <span>“填入已启用平台”是否弹窗提示确认</span>
             </label>
           </section>
-          <section class="settings-section" aria-labelledby="send-settings-heading">
-            <div class="settings-section-heading">
-              <h2 id="send-settings-heading">发送</h2>
-              <span>自动发送目标</span>
-            </div>
-            <div class="settings-toggle-list" id="auto-send-list" aria-label="设置自动发送目标"></div>
-          </section>
         </div>
         <div class="dialog-footer">
           <button class="secondary-action" id="cancel-button" type="button">取消</button>
@@ -906,7 +905,6 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
       const form = document.getElementById("settings-form");
       const closeButton = document.getElementById("close-button");
       const cancelButton = document.getElementById("cancel-button");
-      const autoSendList = document.getElementById("auto-send-list");
 
       function retentionPolicyToValue(policy) {
         if (policy.type === "latest-count") return policy.count === 50 ? "latest-50" : "latest-200";
@@ -928,12 +926,6 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
       form.elements.promptRetention.value = retentionPolicyToValue(options.promptRetentionPolicy);
       form.elements.autoClearPromptEnabled.checked = options.autoClearPromptEnabled ?? true;
       form.elements.confirmBatchSendEnabled.checked = options.confirmBatchSendEnabled ?? true;
-      autoSendList.innerHTML = options.autoSendPlatforms.map((platform) => \`
-        <label class="settings-check">
-          <input type="checkbox" name="autoSendTarget" value="\${platform.id}" \${options.autoSendEnabledPlatformIds.includes(platform.id) ? "checked" : ""} />
-          <span>自动发送 \${platform.name}</span>
-        </label>
-      \`).join("");
 
       function collectResult() {
         const autoClearInput = document.getElementById("settings-auto-clear-prompt");
@@ -944,7 +936,7 @@ function buildSettingsDialogHtml(options: SettingsDialogOptions): string {
           promptRetentionPolicy: retentionPolicyFromValue(form.elements.promptRetention.value),
           autoClearPromptEnabled: autoClearInput ? autoClearInput.checked : Boolean(form.elements.autoClearPromptEnabled.checked),
           confirmBatchSendEnabled: confirmBatchInput ? confirmBatchInput.checked : Boolean(form.elements.confirmBatchSendEnabled.checked),
-          autoSendEnabledPlatformIds: Array.from(form.querySelectorAll("input[name='autoSendTarget']:checked")).map((input) => input.value)
+          autoSendEnabledPlatformIds: []
         };
       }
 

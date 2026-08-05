@@ -90,18 +90,25 @@ export function buildGenericAutosendScript(options: { activate?: boolean; activa
       }
 
       function textFor(element) {
-        return [
+        const ownText = [
           element.getAttribute?.('aria-label'),
           element.getAttribute?.('title'),
           element.getAttribute?.('data-testid'),
           typeof element.className === 'string' ? element.className : '',
           element.textContent
         ].filter(Boolean).join(' ').trim().toLowerCase();
+
+        const svgChildren = element.querySelectorAll?.('svg');
+        const svgText = svgChildren
+          ? Array.from(svgChildren).map((svg) => svg.getAttribute?.('aria-label') || '').filter(Boolean).join(' ')
+          : '';
+
+        return [ownText, svgText].filter(Boolean).join(' ').toLowerCase();
       }
 
       function isRejectedControl(element) {
         const text = textFor(element);
-        return /(microphone|mic|voice|audio|attach|upload|image|file|add|plus|menu|sidebar|drawer|history|search|close|settings|expand|collapse|new chat|麦克风|语音|上传|附件|图片|菜单|侧边栏|展开|收起|搜索|关闭|设置|新建)/.test(text);
+        return /(microphone|mic|voice|audio|record|recording|dictate|speak|transcribe|talk|attach|upload|image|file|add|plus|menu|sidebar|drawer|history|search|close|settings|expand|collapse|new chat|profile|account|avatar|user menu|log ?out|麦克风|语音|录音|录制|上传|附件|图片|菜单|侧边栏|展开|收起|搜索|关闭|设置|新建|个人|账户|头像)/.test(text);
       }
 
       function isExplicitSend(element) {
@@ -137,7 +144,8 @@ export function buildGenericAutosendScript(options: { activate?: boolean; activa
         }
         const horizontalSpan = Math.max(inputRect.right - inputRect.left, 1);
         const rightwardScore = Math.max(0, ((rect.right - inputRect.left) / horizontalSpan) * 42);
-        return 30 + (rect.left >= inputRect.right - 160 ? 25 : 0) + rightwardScore;
+        const rightmostBonus = rect.right >= inputRect.right - 40 ? 35 : 0;
+        return 30 + (rect.left >= inputRect.right - 160 ? 25 : 0) + rightwardScore + rightmostBonus;
       }
 
       function centerOf(element) {

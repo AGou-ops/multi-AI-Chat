@@ -414,12 +414,6 @@ export function App() {
     setPromptStatus(`已记录 ${response.record.results.length} 个平台结果。`);
   }
 
-  function handleRetentionChange(value: string) {
-    const nextPolicy = retentionPolicyFromValue(value);
-    setPromptRetentionPolicy(nextPolicy);
-    void window.multiAIChat?.updateConfig({ promptRetentionPolicy: nextPolicy });
-  }
-
   function handleAutoSendToggle(platformId: string) {
     setAutoSendPlatformIds(() => {
       const next = activeAutoSendPlatformIds.includes(platformId)
@@ -446,9 +440,7 @@ export function App() {
       platformLayoutMode,
       promptRetentionPolicy,
       autoClearPromptEnabled,
-      confirmBatchSendEnabled,
-      autoSendEnabledPlatformIds: activeAutoSendPlatformIds,
-      autoSendPlatforms: autoSendPlatforms.map((platform) => ({ id: platform.id, name: platform.name }))
+      confirmBatchSendEnabled
     });
 
     if (!result) {
@@ -461,14 +453,12 @@ export function App() {
     setPromptRetentionPolicy(result.promptRetentionPolicy);
     setAutoClearPromptEnabled(result.autoClearPromptEnabled);
     setConfirmBatchSendEnabled(result.confirmBatchSendEnabled);
-    setAutoSendPlatformIds(result.autoSendEnabledPlatformIds);
     await window.multiAIChat?.updateConfig({
       themePreference: result.themePreference,
       platformLayoutMode: result.platformLayoutMode,
       promptRetentionPolicy: result.promptRetentionPolicy,
       autoClearPromptEnabled: result.autoClearPromptEnabled,
-      confirmBatchSendEnabled: result.confirmBatchSendEnabled,
-      autoSendEnabledPlatformIds: result.autoSendEnabledPlatformIds
+      confirmBatchSendEnabled: result.confirmBatchSendEnabled
     });
     setPromptStatus("工作台偏好已更新");
     settingsButtonRef.current?.focus();
@@ -571,8 +561,8 @@ export function App() {
           className="window-titlebar-region"
           role="button"
           tabIndex={0}
-          aria-label="双击切换窗口大小"
-          title="双击切换窗口大小"
+          aria-label="拖拽移动窗口，双击切换窗口大小"
+          title="拖拽移动窗口，双击切换窗口大小"
           onDoubleClick={() => void window.multiAIChat?.toggleWindowMaximize()}
           onKeyDown={handleWindowTitlebarKeyDown}
         />
@@ -689,8 +679,8 @@ export function App() {
             className="window-titlebar-region"
             role="button"
             tabIndex={0}
-            aria-label="双击切换窗口大小"
-            title="双击切换窗口大小"
+            aria-label="拖拽移动窗口，双击切换窗口大小"
+            title="拖拽移动窗口，双击切换窗口大小"
             onDoubleClick={() => void window.multiAIChat?.toggleWindowMaximize()}
             onKeyDown={handleWindowTitlebarKeyDown}
           />
@@ -861,51 +851,19 @@ export function App() {
 
       {isPromptHistorySidebarOpen ? (
       <aside className="history-drawer" aria-label="Prompt 历史">
-        <div className="history-header">
-          <h2>Prompt 历史</h2>
-          <div className="history-header-actions">
-            <span>{promptHistory.length} 条</span>
-            <button
-              className="pane-toggle-button"
-              type="button"
-              aria-label="隐藏 Prompt 历史侧边栏"
-              title="隐藏 Prompt 历史侧边栏"
-              onClick={() => setIsPromptHistorySidebarOpen(false)}
-            >
-              <PanelRightClose aria-hidden="true" size={16} />
-            </button>
-          </div>
-        </div>
-        <div className="history-controls">
-          <label htmlFor="prompt-history-search">搜索 Prompt 历史</label>
-          <input
-            id="prompt-history-search"
-            ref={historySearchRef}
-            type="search"
-            value={historyQuery}
-            onChange={(e) => void handleHistorySearch(e.target.value)}
-            placeholder="关键词"
-          />
-          <label htmlFor="prompt-retention">历史保留策略</label>
-          <select
-            id="prompt-retention"
-            value={retentionPolicyToValue(promptRetentionPolicy)}
-            onChange={(e) => handleRetentionChange(e.target.value)}
-          >
-            <option value="forever">永久保存</option>
-            <option value="latest-50">最近 50 条</option>
-            <option value="latest-200">最近 200 条</option>
-            <option value="latest-30-days">最近 30 天</option>
-            <option value="disabled">不保存</option>
-          </select>
-          <button className="icon-button" type="button" onClick={handleClearHistory}>
-            清空历史
-          </button>
-        </div>
         <div className="history-content">
           <section className="execution-section" aria-live="polite">
             <div className="section-header">
               <h3>最近执行</h3>
+              <button
+                className="pane-toggle-button"
+                type="button"
+                aria-label="隐藏 Prompt 历史侧边栏"
+                title="隐藏 Prompt 历史侧边栏"
+                onClick={() => setIsPromptHistorySidebarOpen(false)}
+              >
+                <PanelRightClose aria-hidden="true" size={14} />
+              </button>
             </div>
             {latestExecution ? (
               <ul className="execution-list">
@@ -939,6 +897,20 @@ export function App() {
           <section className="prompt-history-section">
             <div className="section-header">
               <h3>Prompt 历史</h3>
+              <button className="icon-button history-clear-button" type="button" onClick={handleClearHistory} title="清空 Prompt 历史">
+                清空
+              </button>
+            </div>
+            <div className="prompt-history-controls">
+              <input
+                id="prompt-history-search"
+                ref={historySearchRef}
+                type="search"
+                value={historyQuery}
+                onChange={(e) => void handleHistorySearch(e.target.value)}
+                placeholder="搜索关键词…"
+                aria-label="搜索 Prompt 历史"
+              />
             </div>
             {promptHistory.length > 0 ? (
               <ul className="history-list">
@@ -1000,40 +972,4 @@ function statusMetaFromResult(result: PlatformExecutionResult) {
     label: "待手动操作",
     className: "is-skipped"
   };
-}
-
-function retentionPolicyToValue(policy: PromptRetentionPolicy): string {
-  if (policy.type === "forever") {
-    return "forever";
-  }
-
-  if (policy.type === "latest-count") {
-    return policy.count === 50 ? "latest-50" : "latest-200";
-  }
-
-  if (policy.type === "latest-days") {
-    return "latest-30-days";
-  }
-
-  return "disabled";
-}
-
-function retentionPolicyFromValue(value: string): PromptRetentionPolicy {
-  if (value === "latest-50") {
-    return { type: "latest-count", count: 50 };
-  }
-
-  if (value === "latest-200") {
-    return { type: "latest-count", count: 200 };
-  }
-
-  if (value === "latest-30-days") {
-    return { type: "latest-days", days: 30 };
-  }
-
-  if (value === "disabled") {
-    return { type: "disabled" };
-  }
-
-  return { type: "forever" };
 }

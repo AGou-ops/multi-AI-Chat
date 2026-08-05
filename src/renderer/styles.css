@@ -91,7 +91,7 @@ textarea:focus-visible {
   right: 0;
   left: 0;
   height: 44px;
-  -webkit-app-region: no-drag;
+  -webkit-app-region: drag;
   cursor: default;
 }
 
@@ -709,63 +709,45 @@ textarea:focus-visible {
 
 .history-drawer {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
   border-left: 1px solid #dbe7e5;
   background: #ffffff;
 }
 
-.history-controls {
-  display: grid;
-  gap: 7px;
-  padding: 10px;
+.prompt-history-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 12px 8px;
   border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
-.history-controls label {
-  color: #0f766e;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.history-controls input,
-.history-controls select {
+.prompt-history-controls input {
+  width: 100%;
   min-width: 0;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   color: #0f172a;
   background: #ffffff;
-  padding: 7px 9px;
+  padding: 5px 9px;
   font-size: 12px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
 }
 
-.history-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 48px;
-  padding: 10px 12px;
-  border-bottom: 1px solid #e2e8f0;
+.prompt-history-controls input::-webkit-search-cancel-button {
+  display: none;
 }
 
-.history-header-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.history-header h2 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 14px;
-}
-
-.history-header span,
-.history-empty {
-  color: #64748b;
-  font-size: 12px;
+.history-clear-button {
+  font-size: 11px;
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
 }
 
 .history-content {
@@ -803,7 +785,8 @@ textarea:focus-visible {
   min-height: 0;
   margin: 0;
   overflow-y: auto;
-  padding: 10px;
+  overflow-x: hidden;
+  padding: 10px 12px;
   list-style: none;
 }
 
@@ -818,6 +801,7 @@ textarea:focus-visible {
 .execution-item-button {
   display: block;
   width: 100%;
+  overflow: hidden;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #f8fafc;
@@ -847,6 +831,8 @@ textarea:focus-visible {
 
 .execution-item p {
   margin: 6px 0 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   color: #475569;
   font-size: 12px;
   line-height: 1.45;
@@ -859,13 +845,16 @@ textarea:focus-visible {
   min-height: 0;
   margin: 0;
   overflow-y: auto;
-  padding: 10px;
+  overflow-x: hidden;
+  padding: 10px 12px;
   list-style: none;
 }
 
 .history-item {
   display: block;
   width: 100%;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #ffffff;
@@ -887,6 +876,8 @@ textarea:focus-visible {
 .history-empty {
   margin: 0;
   padding: 12px;
+  color: #64748b;
+  font-size: 12px;
 }
 
 .custom-platform-item {
@@ -1205,8 +1196,7 @@ textarea:focus-visible {
 .app-shell[data-theme="dark"] .platform-titlebar,
 .app-shell[data-theme="dark"] .dialog-header,
 .app-shell[data-theme="dark"] .dialog-footer,
-.app-shell[data-theme="dark"] .history-header,
-.app-shell[data-theme="dark"] .history-controls {
+.app-shell[data-theme="dark"] .prompt-history-controls {
   border-color: #334155;
 }
 
@@ -1224,7 +1214,6 @@ textarea:focus-visible {
   color: #ffffff;
 }
 
-.app-shell[data-theme="dark"] .history-header span,
 .app-shell[data-theme="dark"] .history-empty,
 .app-shell[data-theme="dark"] .execution-item-header strong,
 .app-shell[data-theme="dark"] .execution-item p,
@@ -1233,8 +1222,7 @@ textarea:focus-visible {
 }
 
 .app-shell[data-theme="dark"] .prompt-input,
-.app-shell[data-theme="dark"] .history-controls input,
-.app-shell[data-theme="dark"] .history-controls select,
+.app-shell[data-theme="dark"] .prompt-history-controls input,
 .app-shell[data-theme="dark"] .settings-field select,
 .app-shell[data-theme="dark"] .form-field input {
   border-color: #475569;
@@ -1257,7 +1245,6 @@ textarea:focus-visible {
 
 
 .app-shell[data-theme="dark"] .platform-titlebar strong,
-.app-shell[data-theme="dark"] .history-header h2,
 .app-shell[data-theme="dark"] .section-header h3,
 .app-shell[data-theme="dark"] .settings-section-heading h3,
 .app-shell[data-theme="dark"] .dialog-header h2 {
@@ -1347,3 +1334,4 @@ textarea:focus-visible {
     transform: none;
   }
 }
+
