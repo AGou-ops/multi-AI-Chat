@@ -90,25 +90,35 @@ export function buildGenericAutosendScript(options: { activate?: boolean; activa
       }
 
       function textFor(element) {
+        if (!element) return '';
         const ownText = [
           element.getAttribute?.('aria-label'),
           element.getAttribute?.('title'),
           element.getAttribute?.('data-testid'),
+          element.id,
           typeof element.className === 'string' ? element.className : '',
           element.textContent
-        ].filter(Boolean).join(' ').trim().toLowerCase();
+        ].filter(Boolean).join(' ');
 
-        const svgChildren = element.querySelectorAll?.('svg');
-        const svgText = svgChildren
-          ? Array.from(svgChildren).map((svg) => svg.getAttribute?.('aria-label') || '').filter(Boolean).join(' ')
-          : '';
-
-        return [ownText, svgText].filter(Boolean).join(' ').toLowerCase();
+        const children = element.querySelectorAll?.('*') || [];
+        const childText = [];
+        for (let i = 0; i < children.length && i < 30; i++) {
+          const c = children[i];
+          childText.push(
+            c.getAttribute?.('aria-label'),
+            c.getAttribute?.('title'),
+            c.getAttribute?.('data-testid'),
+            c.getAttribute?.('alt'),
+            c.id,
+            typeof c.className === 'string' ? c.className : ''
+          );
+        }
+        return [ownText, childText.filter(Boolean).join(' ')].filter(Boolean).join(' ').toLowerCase();
       }
 
       function isRejectedControl(element) {
         const text = textFor(element);
-        return /(microphone|mic|voice|audio|record|recording|dictate|speak|transcribe|talk|attach|upload|image|file|add|plus|menu|sidebar|drawer|history|search|close|settings|expand|collapse|new chat|profile|account|avatar|user menu|log ?out|麦克风|语音|录音|录制|上传|附件|图片|菜单|侧边栏|展开|收起|搜索|关闭|设置|新建|个人|账户|头像)/.test(text);
+        return /(microphone|mic|voice|audio|record|recording|dictate|dictation|speak|speech|transcribe|talk|stt|whisper|listen|sound|attach|attachment|upload|image|file|media|add|plus|paperclip|camera|photo|document|menu|sidebar|drawer|history|search|close|settings|expand|collapse|new chat|profile|account|avatar|user menu|log ?out|model|select|dropdown|option|tools|plugin|web-search|reasoning|thinking|canvas|artifact|麦克风|话筒|语音|录音|录制|转文字|声控|说话|上传|附件|图片|文件|添加|相册|菜单|侧边栏|展开|收起|搜索|关闭|设置|新建|个人|账户|头像|模型|选择|插件|联网)/.test(text);
       }
 
       function isExplicitSend(element) {
@@ -127,6 +137,23 @@ export function buildGenericAutosendScript(options: { activate?: boolean; activa
           current = current.parentElement;
         }
         return ancestors;
+      }
+
+      function hasRightwardSiblingButton(button, composerButtons) {
+        const r = rectOf(button);
+        if ((r.width ?? 0) === 0 && (r.height ?? 0) === 0) return false;
+        for (let i = 0; i < composerButtons.length; i++) {
+          const other = composerButtons[i];
+          if (other === button) continue;
+          const or = rectOf(other);
+          if ((or.width ?? 0) === 0 && (or.height ?? 0) === 0) continue;
+          const vertOverlap = Math.max(0, Math.min(r.bottom, or.bottom) - Math.max(r.top, or.top));
+          const nearVert = vertOverlap > 0 || Math.abs(((r.top + r.bottom) / 2) - ((or.top + or.bottom) / 2)) <= 40;
+          if (nearVert && or.left >= r.left + 12) {
+            return true;
+          }
+        }
+        return false;
       }
 
       function geometryScore(button, inputRect) {
@@ -218,6 +245,8 @@ export function buildGenericAutosendScript(options: { activate?: boolean; activa
         .flatMap(activationTargets)
         .filter((element, index, all) => element && all.indexOf(element) === index && isUsable(element) && !isRejectedControl(element));
 
+      const composerButtons = allButtons.filter((btn) => ancestors.some((ancestor) => ancestor !== btn && ancestor.contains?.(btn)));
+
       const candidates = allButtons
         .map((button, index) => {
           const inComposer = ancestors.some((ancestor) => ancestor !== button && ancestor.contains?.(button));
@@ -226,6 +255,7 @@ export function buildGenericAutosendScript(options: { activate?: boolean; activa
           const iconOnly = !!button.querySelector?.('svg') && !button.textContent?.trim();
           const pointerLike = window.getComputedStyle?.(button)?.cursor === 'pointer';
           const wrapsEditable = editable ? button.contains?.(editable) : false;
+          const hasRightSibling = hasRightwardSiblingButton(button, composerButtons);
           let score = 0;
 
           if (explicit) {
@@ -248,6 +278,9 @@ export function buildGenericAutosendScript(options: { activate?: boolean; activa
           }
           if (editable) {
             score += geometryScore(button, editableRect);
+          }
+          if (!explicit && hasRightSibling) {
+            score -= 200;
           }
           return { button, score: score - index * 0.01 };
         })

@@ -214,4 +214,47 @@ describe("ClaudeAdapter", () => {
     expect(sendClick).toHaveBeenCalledTimes(1);
     expect(micClick).not.toHaveBeenCalled();
   });
+
+  it("发送按钮 disabled 时绝对不误点左侧麦克风按钮，而是返回失败触发重试", async () => {
+    const adapter = new ClaudeAdapter();
+    const micClick = vi.fn();
+    const sendClick = vi.fn();
+    const mockWC: Partial<WebContents> = {
+      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script)))
+    };
+
+    document.body.innerHTML = `
+      <main>
+        <div data-testid="composer">
+          <div role="textbox" contenteditable="true" data-testid="prompt-editor">hello</div>
+          <button type="button" data-testid="mic-button">
+            <svg></svg>
+          </button>
+          <button type="button" data-testid="send-button" disabled aria-label="Send Message">
+            <svg></svg>
+          </button>
+        </div>
+      </main>
+    `;
+
+    const micButton = document.querySelector("[data-testid='mic-button']") as HTMLButtonElement;
+    const sendButton = document.querySelector("[data-testid='send-button']") as HTMLButtonElement;
+    const composer = document.querySelector("[data-testid='composer']") as HTMLElement;
+    const editor = document.querySelector("[data-testid='prompt-editor']") as HTMLElement;
+
+    micButton.click = micClick;
+    sendButton.click = sendClick;
+
+    composer.getBoundingClientRect = vi.fn(() => ({ width: 720, height: 96, top: 680, right: 900, bottom: 776, left: 180 }) as DOMRect);
+    editor.getBoundingClientRect = vi.fn(() => ({ width: 620, height: 64, top: 700, right: 820, bottom: 764, left: 200 }) as DOMRect);
+    micButton.getBoundingClientRect = vi.fn(() => ({ width: 44, height: 44, top: 710, right: 840, bottom: 754, left: 796 }) as DOMRect);
+    sendButton.getBoundingClientRect = vi.fn(() => ({ width: 44, height: 44, top: 710, right: 888, bottom: 754, left: 844 }) as DOMRect);
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+
+    const result = await adapter.attemptSend(mockWC as WebContents);
+
+    expect(result.success).toBe(false);
+    expect(sendClick).not.toHaveBeenCalled();
+    expect(micClick).not.toHaveBeenCalled();
+  });
 });
