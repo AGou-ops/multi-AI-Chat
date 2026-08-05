@@ -1,15 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 import type { WebContents } from "electron";
 import { ClaudeAdapter } from "./claude-adapter";
-import { dispatchTrustedClick } from "./trusted-click";
+import { dispatchEnterKey, dispatchTrustedClick } from "./trusted-click";
 
 vi.mock("./trusted-click", () => ({
-  dispatchTrustedClick: vi.fn()
+  dispatchTrustedClick: vi.fn(),
+  dispatchEnterKey: vi.fn()
 }));
 
 function mockWebContents(executeJavaScriptResult: unknown): Partial<WebContents> {
   return {
-    executeJavaScript: vi.fn().mockResolvedValue(executeJavaScriptResult)
+    executeJavaScript: vi.fn().mockResolvedValue(executeJavaScriptResult),
+    sendInputEvent: vi.fn()
   };
 }
 
@@ -65,20 +67,41 @@ describe("ClaudeAdapter", () => {
     expect(injectedScript).not.toMatch(/location\.reload|navigate/);
   });
 
-  it("找到发送按钮并成功发送", async () => {
+  it("找到发送按钮并触发 Enter 发送", async () => {
     const adapter = new ClaudeAdapter();
-    const mockWC = mockWebContents({ sent: true, method: "button", x: 800, y: 700 });
+    const mockWC = mockWebContents({ sent: true, method: "dom-explicit" });
 
     const result = await adapter.attemptSend(mockWC as WebContents);
 
     expect(result.success).toBe(true);
-    expect(result.reason).toMatch(/发送按钮/);
-    expect(dispatchTrustedClick).toHaveBeenCalledWith(mockWC, expect.objectContaining({ sent: true }));
+    expect(result.reason).toMatch(/自动发送/);
+    expect(dispatchEnterKey).toHaveBeenCalledWith(mockWC);
   });
 
-  it("未找到发送按钮时返回失败", async () => {
+  it("未找到发送按钮但选中输入框时回退使用模拟 Enter 发送", async () => {
     const adapter = new ClaudeAdapter();
-    const mockWC = mockWebContents({ sent: false });
+    const mockWC: Partial<WebContents> = {
+      executeJavaScript: vi
+        .fn()
+        .mockResolvedValueOnce({ sent: false })
+        .mockResolvedValueOnce({ focused: true })
+    };
+
+    const result = await adapter.attemptSend(mockWC as WebContents);
+
+    expect(result.success).toBe(true);
+    expect(result.reason).toMatch(/Enter 回车键/);
+    expect(dispatchEnterKey).toHaveBeenCalledWith(mockWC);
+  });
+
+  it("未找到发送按钮也未找到输入框时返回失败", async () => {
+    const adapter = new ClaudeAdapter();
+    const mockWC: Partial<WebContents> = {
+      executeJavaScript: vi
+        .fn()
+        .mockResolvedValueOnce({ sent: false })
+        .mockResolvedValueOnce({ focused: false })
+    };
 
     const result = await adapter.attemptSend(mockWC as WebContents);
 
@@ -92,7 +115,8 @@ describe("ClaudeAdapter", () => {
     const sidebarClick = vi.fn();
     const sendClick = vi.fn();
     const mockWC: Partial<WebContents> = {
-      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script)))
+      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script))),
+      sendInputEvent: vi.fn()
     };
 
     document.body.innerHTML = `
@@ -140,7 +164,8 @@ describe("ClaudeAdapter", () => {
     const micClick = vi.fn();
     const sendClick = vi.fn();
     const mockWC: Partial<WebContents> = {
-      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script)))
+      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script))),
+      sendInputEvent: vi.fn()
     };
 
     document.body.innerHTML = `
@@ -183,7 +208,8 @@ describe("ClaudeAdapter", () => {
     const micClick = vi.fn();
     const sendClick = vi.fn();
     const mockWC: Partial<WebContents> = {
-      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script)))
+      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script))),
+      sendInputEvent: vi.fn()
     };
 
     document.body.innerHTML = `
@@ -215,12 +241,13 @@ describe("ClaudeAdapter", () => {
     expect(micClick).not.toHaveBeenCalled();
   });
 
-  it("发送按钮 disabled 时绝对不误点左侧麦克风按钮，而是返回失败触发重试", async () => {
+  it("发送按钮 disabled 时绝对不误点左侧麦克风按钮，但仍可通过模拟 Enter 键触发发送", async () => {
     const adapter = new ClaudeAdapter();
     const micClick = vi.fn();
     const sendClick = vi.fn();
     const mockWC: Partial<WebContents> = {
-      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script)))
+      executeJavaScript: vi.fn().mockImplementation((script: string) => Promise.resolve(eval(script))),
+      sendInputEvent: vi.fn()
     };
 
     document.body.innerHTML = `
@@ -253,8 +280,9 @@ describe("ClaudeAdapter", () => {
 
     const result = await adapter.attemptSend(mockWC as WebContents);
 
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
     expect(sendClick).not.toHaveBeenCalled();
     expect(micClick).not.toHaveBeenCalled();
+    expect(dispatchEnterKey).toHaveBeenCalledWith(mockWC);
   });
 });

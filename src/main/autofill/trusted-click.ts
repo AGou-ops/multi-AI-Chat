@@ -19,3 +19,12 @@ export function dispatchTrustedClick(webContents: WebContents, result: AutosendS
   webContents.sendInputEvent({ type: "mouseDown", x: result.x, y: result.y, button: "left", clickCount: 1 });
   webContents.sendInputEvent({ type: "mouseUp", x: result.x, y: result.y, button: "left", clickCount: 1 });
 }
+
+export function dispatchEnterKey(webContents: WebContents): void {
+  if (typeof webContents.sendInputEvent !== "function") {
+    return;
+  }
+
+  webContents.sendInputEvent({ type: "keyDown", keyCode: "Enter" });
+  webContents.sendInputEvent({ type: "keyUp", keyCode: "Enter" });
+}

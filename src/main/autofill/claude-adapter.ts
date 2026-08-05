@@ -1,8 +1,7 @@
 import type { WebContents } from "electron";
 import type { AutofillResult } from "./types";
 import { buildGenericAutofillScript } from "./generic-fill-script";
-import { buildGenericAutosendScript } from "./generic-send-script";
-import { dispatchTrustedClick } from "./trusted-click";
+import { dispatchEnterKey } from "./trusted-click";
 
 export class ClaudeAdapter {
   readonly platformId = "claude";
@@ -30,19 +29,27 @@ export class ClaudeAdapter {
       const result = await webContents.executeJavaScript(script);
 
       if (result && result.sent) {
-        dispatchTrustedClick(webContents, result);
-        return { success: true, reason: result.method === "enter" ? "已通过回车触发自动发送" : "已点击输入区发送按钮" };
+        dispatchEnterKey(webContents);
+        return { success: true, reason: "已触发 Enter 回车与发送按钮自动发送" };
       }
 
-      const fallbackScript = buildGenericAutosendScript();
-      const fallbackResult = await webContents.executeJavaScript(fallbackScript);
-
-      if (fallbackResult && fallbackResult.sent) {
-        dispatchTrustedClick(webContents, fallbackResult);
-        return { success: true, reason: "已点击输入区发送按钮" };
+      const focusScript = `
+        (function() {
+          var input = document.querySelector('.ProseMirror, [contenteditable="true"], textarea, #prompt-textarea');
+          if (input) {
+            input.focus();
+            return { focused: true };
+          }
+          return { focused: false };
+        })()
+      `;
+      const focusResult = await webContents.executeJavaScript(focusScript);
+      if (focusResult && focusResult.focused) {
+        dispatchEnterKey(webContents);
+        return { success: true, reason: "已通过模拟 Enter 回车键触发自动发送" };
       }
 
-      return { success: false, reason: "未找到 Claude 发送按钮，请手动发送" };
+      return { success: false, reason: "未找到 Claude 输入框与发送按钮，请手动发送" };
     } catch {
       return { success: false, reason: "自动发送失败，请手动发送" };
     }
@@ -103,16 +110,19 @@ function buildClaudeSendScript(): string {
       function isExplicitSend(el) {
         var text = textFor(el);
         if (!text || isRejectedControl(el)) return false;
-        return /(^|\\b|_|-)(send|submit|send-button|send-prompt)(\\b|_|-|$)/.test(text) || /发送|提交/.test(text);
+        return /(^|[\\s_#-])(send|submit|send-button|send-prompt)([\\s_#-]|$) Synthesis/i.test(text) || /(^|[\\s_#-])(send|submit|send-button|send-prompt)([\\s_#-]|$)|\b(send|submit)\b/i.test(text) || /发送|提交/.test(text);
       }
 
       var input = document.querySelector('.ProseMirror, [contenteditable="true"], textarea, #prompt-textarea');
       if (!input) return { sent: false, reason: 'no-input' };
 
+      try { input.focus(); } catch(e) {}
+
       var container = input;
       for (var i = 0; i < 15; i++) {
-        if (container.parentElement && container.parentElement !== document.body) {
-          container = container.parentElement;
+        if (container.parentElement) {
+          var next = container.parentElement;
+          container = next;
           var cr = rectOf(container);
           if (cr.width >= 300 && cr.height >= 80) break;
         }
@@ -127,23 +137,19 @@ function buildClaudeSendScript(): string {
       if (explicitButtons.length > 0) {
         explicitButtons.sort(function(a, b) { return rectOf(b).right - rectOf(a).right; });
         var target = explicitButtons[0];
-        var r = rectOf(target);
-        var cx = Math.round(r.left + r.width / 2);
-        var cy = Math.round(r.top + r.height / 2);
 
         ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'].forEach(function(evt) {
           try {
             var e = new (window.PointerEvent || MouseEvent)(evt, {
               bubbles: true, cancelable: true, composed: true,
-              clientX: cx, clientY: cy, button: 0,
-              buttons: evt.endsWith('down') ? 1 : 0
+              button: 0, buttons: evt.endsWith('down') ? 1 : 0
             });
             target.dispatchEvent(e);
           } catch(err) {}
         });
         try { target.click(); } catch(err) {}
 
-        return { sent: true, method: 'explicit-button', x: cx, y: cy };
+        return { sent: true, method: 'dom-explicit' };
       }
 
       var candidateButtons = buttons.filter(function(btn) {
@@ -157,22 +163,18 @@ function buildClaudeSendScript(): string {
         var rmRect = rectOf(rightmost);
 
         if (rmRect.right >= inputRect.left + inputRect.width * 0.4) {
-          var cx = Math.round(rmRect.left + rmRect.width / 2);
-          var cy = Math.round(rmRect.top + rmRect.height / 2);
-
           ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'].forEach(function(evt) {
             try {
               var e = new (window.PointerEvent || MouseEvent)(evt, {
                 bubbles: true, cancelable: true, composed: true,
-                clientX: cx, clientY: cy, button: 0,
-                buttons: evt.endsWith('down') ? 1 : 0
+                button: 0, buttons: evt.endsWith('down') ? 1 : 0
               });
               rightmost.dispatchEvent(e);
             } catch(err) {}
           });
           try { rightmost.click(); } catch(err) {}
 
-          return { sent: true, method: 'rightmost-button', x: cx, y: cy };
+          return { sent: true, method: 'dom-rightmost' };
         }
       }
 
